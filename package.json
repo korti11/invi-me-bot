@@ -4,7 +4,7 @@
   "description": "A small bot to create discord one time invites within twitch chat.",
   "main": "index.js",
   "scripts": {
-    "test": "node index.js"
+    "dev": "npx nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
-    "eslint": "^7.5.0"
+    "eslint": "^7.5.0",
+    "nodemon": "^2.0.4"
   }
 }
