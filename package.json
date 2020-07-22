@@ -1,0 +1,33 @@
+{
+  "name": "invi-me-bot",
+  "version": "0.1.0",
+  "description": "A small bot to create discord one time invites within twitch chat.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/korti11/invi-me-bot.git"
+  },
+  "keywords": [
+    "discord",
+    "twitch",
+    "invite",
+    "bot"
+  ],
+  "author": "Korti",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/korti11/invi-me-bot/issues"
+  },
+  "homepage": "https://github.com/korti11/invi-me-bot#readme",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "tmi.js": "^1.5.0"
+  },
+  "devDependencies": {
+    "dotenv": "^8.2.0",
+    "eslint": "^7.5.0"
+  }
+}
