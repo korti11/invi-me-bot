@@ -22,6 +22,9 @@ client.on('message', (message) => {
     case 'setRole':
         setRole(member, guild, message);
         break;
+    case 'join':
+        joinChannel(member, guild, message, content.slice(2));
+        break;
     default:
         message.reply(`There is no command ${content[1]}!`);
         break;
@@ -51,6 +54,44 @@ async function setRole(member, guild, message) {
     } else {
         message.reply('No role mentioned.');
     }
+}
+
+/**
+ * 
+ * @param {GuildMember} member 
+ * @param {Guild} guild
+ * @param {Message} message 
+ * @param {String[]} args 
+ */
+async function joinChannel(member, guild, message, args) {
+    if(!isAdmin && !hasRole(member, guild)) {
+        message.reply('You don\' have the permissions to join a twitch channel.');
+        return;
+    }
+
+    if(args.length === 0) {
+        message.reply('You need to provide at least the twitch channel to join.');
+        return;
+    } else if(args.length > 1 && args.length < 3) {
+        message.reply('You need to provide also the max age if you want to set the max uses.');
+        return;
+    } else if(!args[0].startsWith('#')) {
+        message.reply('The twitch channel needs to start with a # symbol.');
+        return;
+    }
+
+    let maxUses = undefined;
+    let maxAge = undefined;
+    if(args.length == 1) {
+        maxUses = 1;
+        maxAge = 60 * 15;
+    } else {
+        maxUses = parseInt(args[1]);
+        maxAge = parseInt(args[2]);
+    }
+
+    await repo.createInvi(args[0], guild.id, maxUses, maxAge);
+    message.reply(`Joined twitch channel ${args[0]}.`);
 }
 
 /**
