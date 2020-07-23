@@ -25,6 +25,10 @@ client.on('message', (message) => {
     case 'join':
         joinChannel(member, guild, message, content.slice(2));
         break;
+    case 'update': {
+        updateOptions(member, guild, message, content.slice(2));
+        break;
+    }
     case 'help':
         printHelp(message);
         break;
@@ -89,12 +93,39 @@ async function joinChannel(member, guild, message, args) {
         maxUses = 1;
         maxAge = 60 * 15;
     } else {
-        maxUses = parseInt(args[1]);
-        maxAge = parseInt(args[2]);
+        maxUses = parseInt(args[1], 10);
+        maxAge = 60 * parseInt(args[2], 10);
     }
 
     await repo.createInvi(args[0], guild.id, maxUses, maxAge);
     message.reply(`Joined twitch channel ${args[0]}.`);
+}
+
+/**
+ * 
+ * @param {GuildMember} member 
+ * @param {Guild} guild 
+ * @param {Message} message 
+ */
+async function updateOptions(member, guild, message, args) {
+    if(!isAdmin && !hasRole(member, guild)) {
+        message.reply('You don\' have the permissions to join a twitch channel.');
+        return;
+    }
+
+    if(args.length < 3) {
+        message.reply('You need to provide the twitch channel, max uses and the max age.');
+    }
+
+    const maxUses = parseInt(args[1], 10);
+    const maxAge = 60 * parseInt(args[2], 10);
+
+    const result = await repo.updateInvi(args[0], maxUses, maxAge);
+    if(result == null) {
+        message.reply(`Couldn't find twitch channel ${args[0]}`);
+    } else {
+        message.reply(`Updated twitch channel ${result.twitchChannel}`);
+    }
 }
 
 /**
@@ -111,7 +142,11 @@ function printHelp(message) {
             { name: '\u200B', value: '\u200B' },
             { name: 'join', value: 'Description: Joins a twitch channel.' },
             { name: '\u200B', value: 'Usage: !invi join <twitch_channel> [<max_uses> <max_age>]' },
-            { name: '\u200B', value: 'Exmaple: !invi join #invi_me or !invi join #invi_me 2 10' }
+            { name: '\u200B', value: 'Exmaple: !invi join #invi_me or !invi join #invi_me 2 10' },
+            { name: '\u200B', value: '\u200B' },
+            { name: 'update', value: 'Description: Updates the invite settings for the given twitch channel.' },
+            { name: '\u200B', value: 'Usage: !invi update <twitch_channel> <max_uses> <max_age>'},
+            { name: '\u200B', value: 'Example: !invi update #invi_me 2 10'},
         );
     message.channel.send(helpMessage);
 }

@@ -72,11 +72,16 @@ class Repository {
      * @returns {Promise<Invi | Any>}
      */
     async updateInvi(twitchChannel, maxUses, maxAge) {
+        let error = undefined;
         const query = Invi.findOneAndUpdate({ twitchChannel }, { inviteOptions: { maxUses, maxAge } }, { useFindAndModify: false }, (err) => {
-            if(err) return Promise.reject(err);
+            if(err) error = err;
         });
         const result = await query.exec();
-        return Promise.resolve(result);
+        if(error) {
+            return Promise.reject(error);
+        } else {
+            return Promise.resolve(result);
+        }
     }
 
     /**
