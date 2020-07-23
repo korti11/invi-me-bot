@@ -1,10 +1,13 @@
 // eslint-disable-next-line no-unused-vars
 const { Client } = require('discord.js');
 const { client } = require('tmi.js');
+const { connectToDB } = require('./data');
 
 require('dotenv').config();
 
 (async () => {
+    connectToDB();
+
     const dcClient = new Client();
     dcClient.login(process.env.DISCORD_TOKEN);
 
