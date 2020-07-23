@@ -1,4 +1,4 @@
-const { Client, GuildMember, Permissions, Guild, Message } = require('discord.js');
+const { Client, GuildMember, Permissions, Guild, Message, MessageEmbed } = require('discord.js');
 const { Repository } = require('../data');
 
 const client = new Client();
@@ -24,6 +24,9 @@ client.on('message', (message) => {
         break;
     case 'join':
         joinChannel(member, guild, message, content.slice(2));
+        break;
+    case 'help':
+        printHelp(message);
         break;
     default:
         message.reply(`There is no command ${content[1]}!`);
@@ -92,6 +95,25 @@ async function joinChannel(member, guild, message, args) {
 
     await repo.createInvi(args[0], guild.id, maxUses, maxAge);
     message.reply(`Joined twitch channel ${args[0]}.`);
+}
+
+/**
+ * 
+ * @param {Message} message 
+ */
+function printHelp(message) {
+    const helpMessage = new MessageEmbed()
+        .setTitle('Invi Bot Help').setDescription('Help page of the Invi Bot.')
+        .addFields(
+            { name: 'setRole', value: 'Description: Sets the role who has the permission to join a twitch channel.' },
+            { name: '\u200B', value: 'Usage: !invi setRole <role>', inline: true},
+            { name: '\u200B', value: 'Example: !invi setRole @Admin', inline: true},
+            { name: '\u200B', value: '\u200B' },
+            { name: 'join', value: 'Description: Joins a twitch channel.' },
+            { name: '\u200B', value: 'Usage: !invi join <twitch_channel> [<max_uses> <max_age>]' },
+            { name: '\u200B', value: 'Exmaple: !invi join #invi_me or !invi join #invi_me 2 10' }
+        );
+    message.channel.send(helpMessage);
 }
 
 /**
