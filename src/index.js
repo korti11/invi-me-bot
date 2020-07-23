@@ -2,14 +2,13 @@
 const { Client } = require('discord.js');
 const { client } = require('tmi.js');
 const { connectToDB } = require('./data');
+const { discord } = require('./discord');
 
 require('dotenv').config();
 
 (async () => {
     connectToDB();
-
-    const dcClient = new Client();
-    dcClient.login(process.env.DISCORD_TOKEN);
+    discord.login(process.env.DISCORD_TOKEN);
 
     const options = {
         options: {

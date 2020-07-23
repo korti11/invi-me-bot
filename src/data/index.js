@@ -1,7 +1,7 @@
 const { Schema, model, connect } = require('mongoose');
 
 function connectToDB() {
-    connect(process.env.MONGO_DB, { useNewUrlParser: true, useUnifiedTopology: true });
+    connect(process.env.MONGO_DB, { useNewUrlParser: true, useUnifiedTopology: true, autoIndex: false });
 }
 
 const inviSchema = new Schema({
@@ -9,12 +9,21 @@ const inviSchema = new Schema({
     guildID: Number,
     inviteOptions: {
         maxUses: Number,
-        maxAge: Number
+        maxAge: Number,
+        creatorRole: String
     }
-}, { autoIndex: false });
+});
 
 const Invi = model('Invi', inviSchema);
 Invi.createIndexes();
+
+const roleSchema = new Schema({
+    guildID: { type: Number, index: true, unique: true },
+    roleID: String
+});
+
+const Role = model('Role', roleSchema);
+Role.createIndexes();
 
 class Repository {
 
@@ -83,8 +92,39 @@ class Repository {
         return Promise.resolve(result.ok === 1);
     }
 
+    /**
+     * 
+     * @param {Number} guildID 
+     * @returns {String}
+     */
+    async getRole(guildID) {
+        return new Promise((res, rej) => {
+            Role.findOne({ guildID }, (err, doc) => {
+                if(err) rej(err);
+                res(doc.roleID);
+            });
+        });
+    }
+
+    /**
+     * 
+     * @param {Number} guildID 
+     * @param {String} roleID 
+     */
+    async setRole(guildID, roleID) {
+        let error = undefined;
+        const query = Role.updateOne({ guildID }, { roleID }, { upsert: true }, (err) => {
+            if(err) error = err;
+        });
+        await query.exec();
+        if(error) {
+            return Promise.reject(error);
+        } else {
+            return Promise.resolve();
+        }
+    }
+
 }
 
 exports.connectToDB = connectToDB;
-exports.Invi = Invi;
 exports.Repository = Repository;
