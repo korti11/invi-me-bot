@@ -90,11 +90,8 @@ class Repository {
      * @returns {Promise<Boolean>}
      */
     async removeInvi(twitchChannel) {
-        const query = Invi.deleteOne({ twitchChannel }, (err) => {
-            if(err) return Promise.reject(err);
-        });
-        const result = await query.exec();
-        return Promise.resolve(result.ok === 1);
+        const result = await Invi.deleteOne({ twitchChannel }).exec();
+        return Promise.resolve(result.deletedCount === 1);
     }
 
     /**

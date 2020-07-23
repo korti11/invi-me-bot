@@ -25,10 +25,12 @@ client.on('message', (message) => {
     case 'join':
         joinChannel(member, guild, message, content.slice(2));
         break;
-    case 'update': {
+    case 'update':
         updateOptions(member, guild, message, content.slice(2));
         break;
-    }
+    case 'remove':
+        removeChannel(member, guild, message, content.slice(2));
+        break;
     case 'help':
         printHelp(message);
         break;
@@ -71,8 +73,8 @@ async function setRole(member, guild, message) {
  * @param {String[]} args 
  */
 async function joinChannel(member, guild, message, args) {
-    if(!isAdmin && !hasRole(member, guild)) {
-        message.reply('You don\' have the permissions to join a twitch channel.');
+    if(!isAdmin(member) && !hasRole(member, guild)) {
+        message.reply('You don\'t have the permissions to join a twitch channel.');
         return;
     }
 
@@ -108,13 +110,14 @@ async function joinChannel(member, guild, message, args) {
  * @param {Message} message 
  */
 async function updateOptions(member, guild, message, args) {
-    if(!isAdmin && !hasRole(member, guild)) {
-        message.reply('You don\' have the permissions to join a twitch channel.');
+    if(!isAdmin(member) && !hasRole(member, guild)) {
+        message.reply('You don\'t have the permissions to join a twitch channel.');
         return;
     }
 
     if(args.length < 3) {
         message.reply('You need to provide the twitch channel, max uses and the max age.');
+        return;
     }
 
     const maxUses = parseInt(args[1], 10);
@@ -125,6 +128,31 @@ async function updateOptions(member, guild, message, args) {
         message.reply(`Couldn't find twitch channel ${args[0]}`);
     } else {
         message.reply(`Updated twitch channel ${result.twitchChannel}`);
+    }
+}
+
+/**
+ * 
+ * @param {GuildMember} member 
+ * @param {Guild} guild 
+ * @param {Message} message 
+ * @param {String[]} args 
+ */
+async function removeChannel(member, guild, message, args) {
+    if(!isAdmin(member) && !hasRole(member, guild)) {
+        message.reply('You don\'t have the permissions to join a twitch channel.');
+        return;
+    }
+
+    if(args.length < 1) {
+        message.reply('You need to provide the twitch channel you want to remove.');
+    }
+
+    const result = await repo.removeInvi(args[0]);
+    if(result) {
+        message.reply(`Successfully removed twitch channel ${args[0]}.`);
+    } else {
+        message.reply(`Couldn't remove twitch channel ${args[0]}.`);
     }
 }
 
