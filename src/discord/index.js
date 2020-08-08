@@ -40,6 +40,29 @@ function login(token) {
     client.login(token);
 }
 
+/**
+ * 
+ * @param {String} twitchChannel 
+ * @returns { String }
+ */
+async function createInvite(twitchChannel, maxUses, maxAge) {
+    const invi = await repo.getInviByChannel(twitchChannel);
+    const guild = client.guilds.resolve(invi.guildID.toString());
+
+    const options = invi.inviteOptions;
+    options['unique'] = true;
+    if(maxUses) {
+        options['maxUses'] = maxUses;
+    }
+    if(maxAge) {
+        options['maxAge'] = maxAge;
+    }
+
+    const invite = await guild.systemChannel.createInvite(options);
+
+    return invite.url;
+}
+
 client.on('guildMemberRemove', async (member) => {
     const bot = client.user;
     if(bot.id === member.id) {
@@ -253,4 +276,4 @@ async function hasRole(member, guild) {
     return member.roles.cache.has(roleID);
 }
 
-exports.discord = { login, on };
+exports.discord = { createInvite, login, on };

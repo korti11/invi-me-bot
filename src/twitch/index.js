@@ -1,5 +1,6 @@
 const { client } = require('tmi.js');
 const { Repository } = require('../data');
+const { discord } = require('../discord');
 
 const repo = new Repository();
 
@@ -23,6 +24,23 @@ async function login() {
     
     twitch = new client(options);
     twitch.connect();
+
+    twitch.on('chat', async (channel, user, message, self) => {
+        if(self) return;
+        const messageParts = message.split(' ');
+        if(messageParts.length < 1) return;
+        if(messageParts[0] !== '!invi') return;
+        if(!user.mod && !isBroadcaster(channel, user)) return;
+
+        const inviteURL = await discord.createInvite(channel, messageParts[2], messageParts[3]);
+        const targetUser = messageParts[1].replace('@', '');
+
+        twitch.whisper(targetUser, `Here is your discord invite: ${inviteURL}`); // TODO: Currently not working. Twitch bot needs verification first.
+    });
+}
+
+function isBroadcaster(channel, user) {
+    return channel.replace('#', '') === user.username;
 }
 
 /**

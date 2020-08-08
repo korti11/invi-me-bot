@@ -6,7 +6,7 @@ function connectToDB() {
 
 const inviSchema = new Schema({
     twitchChannel: { type: String, index: true, unique: true},
-    guildID: Number,
+    guildID: String,
     inviteOptions: {
         maxUses: Number,
         maxAge: Number,
@@ -18,7 +18,7 @@ const Invi = model('Invi', inviSchema);
 Invi.createIndexes();
 
 const roleSchema = new Schema({
-    guildID: { type: Number, index: true, unique: true },
+    guildID: { type: String, index: true, unique: true },
     roleID: String
 });
 
@@ -29,14 +29,11 @@ class Repository {
 
     /**
      * @param {String} twitchChannel
-     * @returns {Promise<Document>}
+     * @returns { { twitchChannel: String, guildID: String, inviteOptions: { maxUses: Number, maxAge: Number, creatorRole: String } } }
      */
     async getInviByChannel(twitchChannel) {
-        return Promise.resolve((resolve) => {
-            Invi.findOne({ twitchChannel }, (res) => {
-                resolve(res);
-            });
-        });
+        const document = await Invi.findOne({ twitchChannel }).exec();
+        return document;
     }
 
     /**
@@ -59,7 +56,7 @@ class Repository {
     /**
      * 
      * @param {String} twitchChannel 
-     * @param {Number} guildID 
+     * @param {String} guildID 
      * @param {Number} maxUses 
      * @param {Number} maxAge 
      * @returns {Promise<Document | any>}
@@ -123,7 +120,7 @@ class Repository {
 
     /**
      * 
-     * @param {Number} guildID 
+     * @param {String} guildID 
      * @returns {String}
      */
     async getRole(guildID) {
@@ -137,7 +134,7 @@ class Repository {
 
     /**
      * 
-     * @param {Number} guildID 
+     * @param {String} guildID 
      * @param {String} roleID 
      */
     async setRole(guildID, roleID) {
