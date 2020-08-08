@@ -12,9 +12,7 @@ pipeline {
         stage('Build image') {
             steps {
                 script {
-                    app = docker.build('korti11/invi-me-bot') {
-                        app.push('dev')
-                    }
+                    app = docker.build('korti11/invi-me-bot')
                 }
             }
         }
