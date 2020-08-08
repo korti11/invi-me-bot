@@ -40,11 +40,15 @@ function login(token) {
     client.login(token);
 }
 
-client.on('guildMemberRemove', (member) => {
+client.on('guildMemberRemove', async (member) => {
     const bot = client.user;
     if(bot.id === member.id) {
         console.log('I got removed oh no :(');
         const guild = member.guild;
+        if(callbackRemove) {
+            const channels = await repo.getChannelsByGuild(guild.id);
+            channels.forEach(channel => callbackRemove(channel));
+        }
         repo.removeInvis(guild.id);
         console.log('But it\'s oke I removed the twitch channels that were connected to this guild. :)');
     }

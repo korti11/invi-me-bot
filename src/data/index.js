@@ -49,6 +49,15 @@ class Repository {
 
     /**
      * 
+     * @param {String} guildID 
+     */
+    async getChannelsByGuild(guildID) {
+        const documents = await Invi.find({ guildID }).exec();
+        return documents.map(invi => invi.twitchChannel);
+    }
+
+    /**
+     * 
      * @param {String} twitchChannel 
      * @param {Number} guildID 
      * @param {Number} maxUses 
@@ -108,7 +117,7 @@ class Repository {
      * @returns {Promise<Boolean>}
      */
     async removeInvis(guildID) {
-        const result = await Invi.deleteMany({ guildID }).exec();
+        const result = await Invi.find({ guildID }).exec();
         return Promise.resolve(result.deletedCount > 0);
     }
 
