@@ -20,4 +20,4 @@ RUN groupadd -r invi && useradd -r -g invi invi \
 USER invi
 
 # Start the bot
-CMD [ 'npm', 'run', 'start' ]
+CMD [ "npm", "run", "start" ]
