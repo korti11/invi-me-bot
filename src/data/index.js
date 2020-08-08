@@ -150,6 +150,15 @@ class Repository {
         }
     }
 
+    /**
+     * 
+     * @param {String} guildID 
+     */
+    async removeRole(guildID) {
+        const result = await Role.deleteOne({ guildID }).exec();
+        return Promise.resolve(result.deletedCount === 1);
+    }
+
 }
 
 exports.connectToDB = connectToDB;

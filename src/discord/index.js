@@ -73,6 +73,7 @@ client.on('guildMemberRemove', async (member) => {
             channels.forEach(channel => callbackRemove(channel));
         }
         repo.removeInvis(guild.id);
+        repo.removeRole(guild.id);
         console.log('But it\'s oke I removed the twitch channels that were connected to this guild. :)');
     }
 });
