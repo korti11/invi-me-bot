@@ -4,6 +4,16 @@ const { Repository } = require('../data');
 const client = new Client();
 const repo = new Repository();
 
+client.on('guildMemberRemove', (member) => {
+    const bot = client.user;
+    if(bot.id === member.id) {
+        console.log('I got removed oh no :(');
+        const guild = member.guild;
+        repo.removeInvis(guild.id);
+        console.log('But it\'s oke I removed the twitch channels that were connected to this guild. :)');
+    }
+});
+
 client.on('message', (message) => {
     if(!message.guild) return;
     

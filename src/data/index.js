@@ -96,6 +96,16 @@ class Repository {
 
     /**
      * 
+     * @param {String} guildID
+     * @returns {Promise<Boolean>}
+     */
+    async removeInvis(guildID) {
+        const result = await Invi.deleteMany({ guildID }).exec();
+        return Promise.resolve(result.deletedCount > 0);
+    }
+
+    /**
+     * 
      * @param {Number} guildID 
      * @returns {String}
      */
