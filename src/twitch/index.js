@@ -3,6 +3,8 @@ const { Repository } = require('../data');
 
 const repo = new Repository();
 
+let twitch = undefined;
+
 async function login() {
     const options = {
         options: {
@@ -19,10 +21,25 @@ async function login() {
         channels: await repo.getAllChannels()
     };
     
-    const twitch = new client(options);
+    twitch = new client(options);
     twitch.connect();
 }
 
+/**
+ * 
+ * @param {String} channel 
+ */
+async function joinChannel(channel) {
+    twitch.join(channel);
+}
+
+/**
+ * 
+ * @param {String} channel 
+ */
+async function leaveChannel(channel) {
+    twitch.part(channel);
+}
 
 
-exports.twitch = { login };
+exports.twitch = { login, joinChannel, leaveChannel };

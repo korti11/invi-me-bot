@@ -8,4 +8,12 @@ require('dotenv').config();
     connectToDB();
     discord.login(process.env.DISCORD_TOKEN);
     twitch.login();
+
+    discord.on('join', (channel) => {
+        twitch.joinChannel(channel);
+    });
+    discord.on('remove', (channel) => {
+        twitch.leaveChannel(channel);
+    });
+
 })();

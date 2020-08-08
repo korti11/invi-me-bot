@@ -1,9 +1,44 @@
 // eslint-disable-next-line no-unused-vars
 const { Client, GuildMember, Permissions, Guild, Message, MessageEmbed } = require('discord.js');
 const { Repository } = require('../data');
+const { isFunction } = require('../util');
 
 const client = new Client();
 const repo = new Repository();
+
+// Callbacks
+let callbackJoin = undefined;
+let callbackRemove = undefined;
+
+/**
+ * 
+ * @param {String} event 
+ * @param {Function} callback 
+ */
+function on(event, callback) {
+    switch(event) {
+    case 'join':
+        if(isFunction(callback)) {
+            callbackJoin = callback;
+        }
+        break;
+    case 'remove':
+        if(isFunction(callback)) {
+            callbackRemove = callback;
+        }
+        break;
+    default:
+        console.log(`Event ${event} not available.`);
+    }
+}
+
+/**
+ * 
+ * @param {String} token 
+ */
+function login(token) {
+    client.login(token);
+}
 
 client.on('guildMemberRemove', (member) => {
     const bot = client.user;
@@ -112,6 +147,7 @@ async function joinChannel(member, guild, message, args) {
 
     await repo.createInvi(args[0], guild.id, maxUses, maxAge);
     message.reply(`Joined twitch channel ${args[0]}.`);
+    callbackJoin(args[0]);
 }
 
 /**
@@ -162,6 +198,9 @@ async function removeChannel(member, guild, message, args) {
     const result = await repo.removeInvi(args[0]);
     if(result) {
         message.reply(`Successfully removed twitch channel ${args[0]}.`);
+        if(callbackRemove) {
+            callbackRemove(args[0]);
+        }
     } else {
         message.reply(`Couldn't remove twitch channel ${args[0]}.`);
     }
@@ -210,4 +249,4 @@ async function hasRole(member, guild) {
     return member.roles.cache.has(roleID);
 }
 
-exports.discord = client;
+exports.discord = { login, on };
