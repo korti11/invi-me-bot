@@ -40,6 +40,14 @@ class Repository {
     }
 
     /**
+     * @returns {String[]}
+     */
+    async getAllChannels() {
+        const documents = await Invi.find({}).exec();
+        return documents.map(invi => invi.twitchChannel);
+    }
+
+    /**
      * 
      * @param {String} twitchChannel 
      * @param {Number} guildID 

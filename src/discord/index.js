@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-unused-vars
 const { Client, GuildMember, Permissions, Guild, Message, MessageEmbed } = require('discord.js');
 const { Repository } = require('../data');
 
