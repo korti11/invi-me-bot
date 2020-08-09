@@ -9,7 +9,7 @@ To add the bot to your Twitch channel follow these three small steps.
 
 1. Let the bot join your preferred Discord server with this [link](http://invi.korti.io).
 2. (Optional) Set the role who can operate this bot. Per default users with the "Administrator" Permission can always operate the bot.
-    * !invi setRole 
+    * `!invi setRole @<role>`
 3. Let the bot join your preferred Twitch channel with the following command.
     * `!invi join #<twitch_channel> [<max_uses> <max_age>]`
     * Max uses and max age are optional but both are needed to use this optional. Defaults - Max uses: 1, Max age: 15 min
