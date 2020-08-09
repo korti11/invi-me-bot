@@ -252,22 +252,7 @@ async function removeChannel(member, guild, message, args) {
  * @param {Message} message 
  */
 function printHelp(message) {
-    const helpMessage = new MessageEmbed()
-        .setTitle('Invi Bot Help').setDescription('Help page of the Invi Bot.')
-        .addFields(
-            { name: 'setRole', value: 'Description: Sets the role who has the permission to join a twitch channel.' },
-            { name: '\u200B', value: 'Usage: !invi setRole <role>', inline: true},
-            { name: '\u200B', value: 'Example: !invi setRole @Admin', inline: true},
-            { name: '\u200B', value: '\u200B' },
-            { name: 'join', value: 'Description: Joins a twitch channel.' },
-            { name: '\u200B', value: 'Usage: !invi join <twitch_channel> [<max_uses> <max_age>]' },
-            { name: '\u200B', value: 'Exmaple: !invi join #invi_me or !invi join #invi_me 2 10' },
-            { name: '\u200B', value: '\u200B' },
-            { name: 'update', value: 'Description: Updates the invite settings for the given twitch channel.' },
-            { name: '\u200B', value: 'Usage: !invi update <twitch_channel> <max_uses> <max_age>'},
-            { name: '\u200B', value: 'Example: !invi update #invi_me 2 10'},
-        );
-    message.channel.send(helpMessage);
+    message.reply('You can see all commands here: https://github.com/korti11/invi-me-bot/blob/release/COMMANDS.md');
 }
 
 /**
