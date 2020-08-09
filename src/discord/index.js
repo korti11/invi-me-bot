@@ -102,7 +102,7 @@ client.on('message', (message) => {
     case 'update':
         updateOptions(member, guild, message, content.slice(2));
         break;
-    case 'remove':
+    case 'leave':
         removeChannel(member, guild, message, content.slice(2));
         break;
     case 'help':
@@ -233,17 +233,17 @@ async function removeChannel(member, guild, message, args) {
     }
 
     if(args.length < 1) {
-        message.reply('You need to provide the twitch channel you want to remove.');
+        message.reply('You need to provide the twitch channel you want to leave.');
     }
 
     const result = await repo.removeInvi(args[0], guild.id);
     if(result) {
-        message.reply(`Successfully removed twitch channel ${args[0]}.`);
+        message.reply(`Successfully left the twitch channel ${args[0]}.`);
         if(callbackRemove) {
             callbackRemove(args[0]);
         }
     } else {
-        message.reply(`Couldn't remove twitch channel ${args[0]}.`);
+        message.reply(`Couldn't leave the twitch channel ${args[0]}.`);
     }
 }
 
