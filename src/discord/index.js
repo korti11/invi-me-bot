@@ -147,7 +147,7 @@ async function setRole(member, guild, message) {
  * @param {String[]} args 
  */
 async function joinChannel(member, guild, message, args) {
-    if(!isAdmin(member) && !hasRole(member, guild)) {
+    if(!isAdmin(member) && !(await hasRole(member, guild))) {
         message.reply('You don\'t have the permissions to join a twitch channel.');
         return;
     }
@@ -198,7 +198,7 @@ async function joinChannel(member, guild, message, args) {
  * @param {Message} message 
  */
 async function updateOptions(member, guild, message, args) {
-    if(!isAdmin(member) && !hasRole(member, guild)) {
+    if(!isAdmin(member) && !(await hasRole(member, guild))) {
         message.reply('You don\'t have the permissions to join a twitch channel.');
         return;
     }
@@ -227,7 +227,7 @@ async function updateOptions(member, guild, message, args) {
  * @param {String[]} args 
  */
 async function removeChannel(member, guild, message, args) {
-    if(!isAdmin(member) && !hasRole(member, guild)) {
+    if(!isAdmin(member) && !(await hasRole(member, guild))) {
         message.reply('You don\'t have the permissions to join a twitch channel.');
         return;
     }
