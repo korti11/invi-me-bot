@@ -2,6 +2,7 @@
 const { Client, GuildMember, Permissions, Guild, Message, MessageEmbed } = require('discord.js');
 const { Repository } = require('../data');
 const { isFunction } = require('../util');
+const { config } = require('../config');
 
 const client = new Client();
 const repo = new Repository();
@@ -32,12 +33,8 @@ function on(event, callback) {
     }
 }
 
-/**
- * 
- * @param {String} token 
- */
-function login(token) {
-    client.login(token);
+function login() {
+    client.login(config.discord_token);
 }
 
 /**

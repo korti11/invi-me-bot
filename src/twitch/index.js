@@ -1,24 +1,24 @@
 const { client } = require('tmi.js');
 const { Repository } = require('../data');
 const { discord } = require('../discord');
+const { config } = require('../config');
 
 const repo = new Repository();
 
 let twitch = undefined;
 
 async function login() {
-    const d = process.env.TWITCH_DEBUG !== undefined ? process.env.TWITCH_DEBUG.toLowerCase() : 'false';
     const options = {
         options: {
-            debug: d === 'true'
+            debug: config.twitch_debug
         },
         connection: {
             reconnect: true,
             secure: true
         },
         identity: {
-            username: process.env.TWITCH_USER,
-            password: process.env.TWITCH_TOKEN
+            username: config.twitch_user,
+            password: config.twitch_token
         },
         channels: await repo.getAllChannels()
     };

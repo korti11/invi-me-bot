@@ -1,0 +1,7 @@
+{
+    "discord_toke": "",
+    "twitch_user": "",
+    "twitch_token": "",
+    "twitch_debug": false,
+    "mongo_db": ""
+}
