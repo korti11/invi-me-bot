@@ -2,6 +2,7 @@
 const { Client, GuildMember, Permissions, Guild, Message, MessageEmbed } = require('discord.js');
 const { Repository } = require('../data');
 const { isFunction } = require('../util');
+const { config } = require('../config');
 
 const client = new Client();
 const repo = new Repository();
@@ -32,12 +33,8 @@ function on(event, callback) {
     }
 }
 
-/**
- * 
- * @param {String} token 
- */
-function login(token) {
-    client.login(token);
+function login() {
+    client.login(config.discord_token);
 }
 
 /**
@@ -102,7 +99,7 @@ client.on('message', (message) => {
     case 'update':
         updateOptions(member, guild, message, content.slice(2));
         break;
-    case 'remove':
+    case 'leave':
         removeChannel(member, guild, message, content.slice(2));
         break;
     case 'help':
@@ -147,7 +144,7 @@ async function setRole(member, guild, message) {
  * @param {String[]} args 
  */
 async function joinChannel(member, guild, message, args) {
-    if(!isAdmin(member) && !hasRole(member, guild)) {
+    if(!isAdmin(member) && !(await hasRole(member, guild))) {
         message.reply('You don\'t have the permissions to join a twitch channel.');
         return;
     }
@@ -173,9 +170,22 @@ async function joinChannel(member, guild, message, args) {
         maxAge = 60 * parseInt(args[2], 10);
     }
 
-    await repo.createInvi(args[0], guild.id, maxUses, maxAge);
-    message.reply(`Joined twitch channel ${args[0]}.`);
-    callbackJoin(args[0]);
+    try {
+        await repo.createInvi(args[0], guild.id, maxUses, maxAge);
+        message.reply(`Joined twitch channel ${args[0]}.`);
+        callbackJoin(args[0]);
+    } catch(error) {
+        if(error.code === 11000) {
+            const guildID = (await repo.getInviByChannel(args[0])).guildID;
+            if(guild.id === guildID) {
+                message.reply(`I already joined the twitch channel ${args[0]}.`);
+            } else {
+                message.reply(`I already joined the twitch channel ${args[0]} on another server.`);
+            }
+        } else {
+            message.reply('Oh no an unexpected error has happened :(. I\'m sry about this I hope I can do it next time :).');
+        }
+    }
 }
 
 /**
@@ -185,7 +195,7 @@ async function joinChannel(member, guild, message, args) {
  * @param {Message} message 
  */
 async function updateOptions(member, guild, message, args) {
-    if(!isAdmin(member) && !hasRole(member, guild)) {
+    if(!isAdmin(member) && !(await hasRole(member, guild))) {
         message.reply('You don\'t have the permissions to join a twitch channel.');
         return;
     }
@@ -214,23 +224,23 @@ async function updateOptions(member, guild, message, args) {
  * @param {String[]} args 
  */
 async function removeChannel(member, guild, message, args) {
-    if(!isAdmin(member) && !hasRole(member, guild)) {
+    if(!isAdmin(member) && !(await hasRole(member, guild))) {
         message.reply('You don\'t have the permissions to join a twitch channel.');
         return;
     }
 
     if(args.length < 1) {
-        message.reply('You need to provide the twitch channel you want to remove.');
+        message.reply('You need to provide the twitch channel you want to leave.');
     }
 
-    const result = await repo.removeInvi(args[0]);
+    const result = await repo.removeInvi(args[0], guild.id);
     if(result) {
-        message.reply(`Successfully removed twitch channel ${args[0]}.`);
+        message.reply(`Successfully left the twitch channel ${args[0]}.`);
         if(callbackRemove) {
             callbackRemove(args[0]);
         }
     } else {
-        message.reply(`Couldn't remove twitch channel ${args[0]}.`);
+        message.reply(`Couldn't leave the twitch channel ${args[0]}.`);
     }
 }
 
@@ -239,22 +249,7 @@ async function removeChannel(member, guild, message, args) {
  * @param {Message} message 
  */
 function printHelp(message) {
-    const helpMessage = new MessageEmbed()
-        .setTitle('Invi Bot Help').setDescription('Help page of the Invi Bot.')
-        .addFields(
-            { name: 'setRole', value: 'Description: Sets the role who has the permission to join a twitch channel.' },
-            { name: '\u200B', value: 'Usage: !invi setRole <role>', inline: true},
-            { name: '\u200B', value: 'Example: !invi setRole @Admin', inline: true},
-            { name: '\u200B', value: '\u200B' },
-            { name: 'join', value: 'Description: Joins a twitch channel.' },
-            { name: '\u200B', value: 'Usage: !invi join <twitch_channel> [<max_uses> <max_age>]' },
-            { name: '\u200B', value: 'Exmaple: !invi join #invi_me or !invi join #invi_me 2 10' },
-            { name: '\u200B', value: '\u200B' },
-            { name: 'update', value: 'Description: Updates the invite settings for the given twitch channel.' },
-            { name: '\u200B', value: 'Usage: !invi update <twitch_channel> <max_uses> <max_age>'},
-            { name: '\u200B', value: 'Example: !invi update #invi_me 2 10'},
-        );
-    message.channel.send(helpMessage);
+    message.reply('You can see all commands here: https://github.com/korti11/invi-me-bot/blob/release/COMMANDS.md');
 }
 
 /**

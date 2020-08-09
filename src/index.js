@@ -1,12 +1,12 @@
 const { connectToDB } = require('./data');
 const { discord } = require('./discord');
 const { twitch } = require('./twitch');
-
-require('dotenv').config();
+const { loadConfig } = require('./config');
 
 (async () => {
+    loadConfig();
     connectToDB();
-    discord.login(process.env.DISCORD_TOKEN);
+    discord.login();
     twitch.login();
 
     discord.on('join', (channel) => {

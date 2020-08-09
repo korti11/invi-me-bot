@@ -1,20 +1,3 @@
-# invi-me-bot
-[![Build Status](https://jenkins.korti.io/job/invi-me-bot/job/master/badge/icon?style=flat-square&subject=Dev%20build)](https://jenkins.korti.io/job/invi-me-bot/job/master/)
-[![Build Status](https://jenkins.korti.io/job/invi-me-bot/job/release/badge/icon?style=flat-square&subject=Release%20build)](https://jenkins.korti.io/job/invi-me-bot/job/release/)
-## Description
-Invi Me is a small little bot that can create Discord invites within Twitch chat and whisper it to the target user.
-
-## Usage
-To add the bot to your Twitch channel follow these three small steps.
-
-1. Let the bot join your preferred Discord server with this [link](http://invi.korti.io).
-2. (Optional) Set the role who can operate this bot. Per default users with the "Administrator" Permission can always operate the bot.
-    * `!invi setRole @<role>`
-3. Let the bot join your preferred Twitch channel with the following command.
-    * `!invi join #<twitch_channel> [<max_uses> <max_age>]`
-    * Max uses and max age are optional but both are needed to use this optional. Defaults - Max uses: 1, Max age: 15 min
-    * The max age parameter should be given in minutes.
-
 ## Commands
 
 ### Discord

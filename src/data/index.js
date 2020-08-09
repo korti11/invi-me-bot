@@ -1,7 +1,8 @@
 const { Schema, model, connect } = require('mongoose');
+const { config } = require('../config');
 
 function connectToDB() {
-    connect(process.env.MONGO_DB, { useNewUrlParser: true, useUnifiedTopology: true, autoIndex: false });
+    connect(config.mongo_db, { useNewUrlParser: true, useUnifiedTopology: true, autoIndex: false });
 }
 
 const inviSchema = new Schema({
@@ -103,8 +104,8 @@ class Repository {
      * @param {String} twitchChannel 
      * @returns {Promise<Boolean>}
      */
-    async removeInvi(twitchChannel) {
-        const result = await Invi.deleteOne({ twitchChannel }).exec();
+    async removeInvi(twitchChannel, guildID) {
+        const result = await Invi.deleteOne({ twitchChannel, guildID }).exec();
         return Promise.resolve(result.deletedCount === 1);
     }
 
@@ -124,12 +125,12 @@ class Repository {
      * @returns {String}
      */
     async getRole(guildID) {
-        return new Promise((res, rej) => {
-            Role.findOne({ guildID }, (err, doc) => {
-                if(err) rej(err);
-                res(doc.roleID);
-            });
-        });
+        const document = await Role.findOne({ guildID }).exec();
+        if(document !== null && document !== undefined) {
+            return document.roleID;
+        } else {
+            return '';
+        }
     }
 
     /**
