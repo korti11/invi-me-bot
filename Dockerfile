@@ -10,7 +10,7 @@ COPY package*.json ./
 COPY . .
 
 # Install app dependencies
-RUN npm ci
+RUN npm ci --production
 
 # Add invi user and set as owner of the current directory
 RUN groupadd -r invi && useradd -r -g invi invi \
