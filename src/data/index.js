@@ -103,8 +103,8 @@ class Repository {
      * @param {String} twitchChannel 
      * @returns {Promise<Boolean>}
      */
-    async removeInvi(twitchChannel) {
-        const result = await Invi.deleteOne({ twitchChannel }).exec();
+    async removeInvi(twitchChannel, guildID) {
+        const result = await Invi.deleteOne({ twitchChannel, guildID }).exec();
         return Promise.resolve(result.deletedCount === 1);
     }
 

@@ -173,9 +173,22 @@ async function joinChannel(member, guild, message, args) {
         maxAge = 60 * parseInt(args[2], 10);
     }
 
-    await repo.createInvi(args[0], guild.id, maxUses, maxAge);
-    message.reply(`Joined twitch channel ${args[0]}.`);
-    callbackJoin(args[0]);
+    try {
+        await repo.createInvi(args[0], guild.id, maxUses, maxAge);
+        message.reply(`Joined twitch channel ${args[0]}.`);
+        callbackJoin(args[0]);
+    } catch(error) {
+        if(error.code === 11000) {
+            const guildID = (await repo.getInviByChannel(args[0])).guildID;
+            if(guild.id === guildID) {
+                message.reply(`I already joined the twitch channel ${args[0]}.`);
+            } else {
+                message.reply(`I already joined the twitch channel ${args[0]} on another server.`);
+            }
+        } else {
+            message.reply('Oh no an unexpected error has happened :(. I\'m sry about this I hope I can do it next time :).');
+        }
+    }
 }
 
 /**
@@ -223,7 +236,7 @@ async function removeChannel(member, guild, message, args) {
         message.reply('You need to provide the twitch channel you want to remove.');
     }
 
-    const result = await repo.removeInvi(args[0]);
+    const result = await repo.removeInvi(args[0], guild.id);
     if(result) {
         message.reply(`Successfully removed twitch channel ${args[0]}.`);
         if(callbackRemove) {
