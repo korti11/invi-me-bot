@@ -124,12 +124,12 @@ class Repository {
      * @returns {String}
      */
     async getRole(guildID) {
-        return new Promise((res, rej) => {
-            Role.findOne({ guildID }, (err, doc) => {
-                if(err) rej(err);
-                res(doc.roleID);
-            });
-        });
+        const document = await Role.findOne({ guildID }).exec();
+        if(document !== null && document !== undefined) {
+            return document.roleID;
+        } else {
+            return '';
+        }
     }
 
     /**
