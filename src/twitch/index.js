@@ -26,6 +26,14 @@ async function login() {
     twitch = new client(options);
     twitch.connect();
 
+    discord.on('join', (channel) => {
+        joinChannel(channel);
+    });
+    discord.on('remove', (channel) => {
+        leaveChannel(channel);
+        repo.removeLastInviteByChannel(channel);
+    });
+
     twitch.on('chat', async (channel, user, message, self) => {
         if(self) return;
         const messageParts = message.split(' ');

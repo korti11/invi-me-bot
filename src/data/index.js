@@ -208,6 +208,15 @@ class Repository {
         return Promise.resolve(result.deletedCount === 1);
     }
 
+    /**
+     * 
+     * @param {String} twitchChannel 
+     */
+    async removeLastInviteByChannel(twitchChannel) {
+        const result = await LastInvite.deleteOne({ twitchChannel }).exec();
+        return Promise.resolve(result.deletedCount === 1);
+    }
+
 }
 
 exports.connectToDB = connectToDB;

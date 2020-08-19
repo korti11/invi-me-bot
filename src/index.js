@@ -8,12 +8,4 @@ const { loadConfig } = require('./config');
     connectToDB();
     discord.login();
     twitch.login();
-
-    discord.on('join', (channel) => {
-        twitch.joinChannel(channel);
-    });
-    discord.on('remove', (channel) => {
-        twitch.leaveChannel(channel);
-    });
-
 })();
