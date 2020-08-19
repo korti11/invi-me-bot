@@ -119,6 +119,9 @@ client.on('message', (message) => {
     case 'update':
         updateOptions(member, guild, message, content.slice(2));
         break;
+    case 'list':
+        listChannels(member, guild, message);
+        break;
     case 'leave':
         removeChannel(member, guild, message, content.slice(2));
         break;
@@ -235,6 +238,27 @@ async function updateOptions(member, guild, message, args) {
         message.reply(`Couldn't find twitch channel ${twitchChannel}`);
     } else {
         message.reply(`Updated twitch channel ${result.twitchChannel}`);
+    }
+}
+
+/**
+ * 
+ * @param {GuildMember} member 
+ * @param {Guild} guild 
+ * @param {Message} message 
+ */
+async function listChannels(member, guild, message) {
+    if(!isAdmin(member) && !(await hasRole(member, guild))) {
+        message.reply('You don\'t have the permissions to join a twitch channel.');
+        return;
+    }
+
+    const result = await repo.getChannelsByGuild(guild.id);
+    if(result.length === 0) {
+        message.reply('No twitch channels found for this server.');
+    } else {
+        const channelList = '- '.concat(result.join('\n- '));
+        message.reply(`Found the following twitch channles for this server: \n${channelList}`);
     }
 }
 

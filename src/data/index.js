@@ -7,11 +7,10 @@ function connectToDB() {
 
 const inviSchema = new Schema({
     twitchChannel: { type: String, index: true, unique: true},
-    guildID: String,
+    guildID: { type: String, index: true },
     inviteOptions: {
         maxUses: Number,
-        maxAge: Number,
-        creatorRole: String
+        maxAge: Number
     }
 });
 
@@ -38,7 +37,7 @@ class Repository {
 
     /**
      * @param {String} twitchChannel
-     * @returns { { twitchChannel: String, guildID: String, inviteOptions: { maxUses: Number, maxAge: Number, creatorRole: String } } }
+     * @returns { { twitchChannel: String, guildID: String, inviteOptions: { maxUses: Number, maxAge: Number } } }
      */
     async getInviByChannel(twitchChannel) {
         const document = await Invi.findOne({ twitchChannel }).exec();
@@ -56,6 +55,7 @@ class Repository {
     /**
      * 
      * @param {String} guildID 
+     * @returns {String[]}
      */
     async getChannelsByGuild(guildID) {
         const documents = await Invi.find({ guildID }).exec();
