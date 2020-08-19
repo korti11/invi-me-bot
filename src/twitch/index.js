@@ -43,7 +43,8 @@ async function login() {
         const inviteURL = await discord.createInvite(channel, messageParts[2], messageParts[3]);
         const targetUser = messageParts[1].replace('@', '');
 
-        twitch.whisper(targetUser, `Here is your discord invite: ${inviteURL}`); // TODO: Currently not working. Twitch bot needs verification first.
+        twitch.whisper(targetUser, `Here is your discord invite: ${inviteURL}`);
+        twitch.say(channel, 'Sent the invite message.');
     });
 }
 
