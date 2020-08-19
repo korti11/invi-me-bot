@@ -7,11 +7,10 @@ function connectToDB() {
 
 const inviSchema = new Schema({
     twitchChannel: { type: String, index: true, unique: true},
-    guildID: String,
+    guildID: { type: String, index: true },
     inviteOptions: {
         maxUses: Number,
-        maxAge: Number,
-        creatorRole: String
+        maxAge: Number
     }
 });
 
@@ -26,11 +25,19 @@ const roleSchema = new Schema({
 const Role = model('Role', roleSchema);
 Role.createIndexes();
 
+const lastInviteSchema = new Schema({
+    twitchChannel: { type: String, index: true, unique: true },
+    code: { type: String, index: true, unique: true }
+});
+
+const LastInvite = model('LastInvite', lastInviteSchema);
+LastInvite.createIndexes();
+
 class Repository {
 
     /**
      * @param {String} twitchChannel
-     * @returns { { twitchChannel: String, guildID: String, inviteOptions: { maxUses: Number, maxAge: Number, creatorRole: String } } }
+     * @returns { { twitchChannel: String, guildID: String, inviteOptions: { maxUses: Number, maxAge: Number } } }
      */
     async getInviByChannel(twitchChannel) {
         const document = await Invi.findOne({ twitchChannel }).exec();
@@ -48,6 +55,7 @@ class Repository {
     /**
      * 
      * @param {String} guildID 
+     * @returns {String[]}
      */
     async getChannelsByGuild(guildID) {
         const documents = await Invi.find({ guildID }).exec();
@@ -104,8 +112,8 @@ class Repository {
      * @param {String} twitchChannel 
      * @returns {Promise<Boolean>}
      */
-    async removeInvi(twitchChannel, guildID) {
-        const result = await Invi.deleteOne({ twitchChannel, guildID }).exec();
+    async removeInvi(twitchChannel) {
+        const result = await Invi.deleteOne({ twitchChannel }).exec();
         return Promise.resolve(result.deletedCount === 1);
     }
 
@@ -157,6 +165,55 @@ class Repository {
      */
     async removeRole(guildID) {
         const result = await Role.deleteOne({ guildID }).exec();
+        return Promise.resolve(result.deletedCount === 1);
+    }
+
+    /**
+     * 
+     * @param {String} twitchChannel 
+     */
+    async getLastInvite(twitchChannel) {
+        const document = await LastInvite.findOne({ twitchChannel }).exec();
+        if(document !== null && document !== undefined) {
+            return document.code;
+        } else {
+            return '';
+        }
+    }
+
+    /**
+     * 
+     * @param {String} twitchChannel 
+     * @param {String} inviteCode 
+     */
+    async setLastInvite(twitchChannel, inviteCode) {
+        let error = undefined;
+        const query = LastInvite.updateOne({ twitchChannel }, { code: inviteCode }, { upsert: true }, (err) => {
+            if(err) error = err;
+        });
+        await query.exec();
+        if(error) {
+            return Promise.reject(error);
+        } else {
+            return Promise.resolve();
+        }
+    }
+
+    /**
+     * 
+     * @param {String} inviteCode 
+     */
+    async removeLastInvite(inviteCode) {
+        const result = await LastInvite.deleteOne({ code: inviteCode }).exec();
+        return Promise.resolve(result.deletedCount === 1);
+    }
+
+    /**
+     * 
+     * @param {String} twitchChannel 
+     */
+    async removeLastInviteByChannel(twitchChannel) {
+        const result = await LastInvite.deleteOne({ twitchChannel }).exec();
         return Promise.resolve(result.deletedCount === 1);
     }
 

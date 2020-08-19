@@ -34,17 +34,21 @@ Every command starts with `!invi`
     * The max age parameter should be given in minutes.
     * A `0` for max uses or max age means infinite.
     * Example: `!invi update #invi_me 2 10`
+* `list` - Lists all joined twitch channel for this discord server.
 * `leave` - Twitch bot leaves the given Twitch channel.
     * Usage: `!invi leave #<twitch_channel>`
     * Example: `!invi leave #invi_me`
 * `help` - Links to this README.md file for all commands.
 ### Twitch
-For the Twitch chat there is only one command, the `!invi` command it self.
-* Usage: `!invi <target_user> [max_uses] [max_age]`
-* The max age parameter should be given in minutes.
-* For the max age parameter the max uses parameter is also needed.
-* A `0` for max uses or max age means infinite.
-* Examples
-    * `!invi @invi_me`
-    * `!invi @invi_me 3`
-    * `!invi @invi_me 2 10`
+Every command starts with `!invi`
+* `@<target_user>` - Sends the discord invite link to the given user.
+    * Usage: `!invi @<target_user> [max_uses] [max_age]`
+    * The max age parameter should be given in minutes.
+    * For the max age parameter the max uses parameter is also needed.
+    * A `0` for max uses or max age means infinite.
+    * Examples
+        * `!invi @invi_me`
+        * `!invi @invi_me 3`
+        * `!invi @invi_me 2 10`
+* `purge` - Deletes the last created discord invite link.
+* `leave` - The twitch bot leaves the twitch channel.

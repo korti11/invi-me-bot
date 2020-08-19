@@ -26,6 +26,14 @@ async function login() {
     twitch = new client(options);
     twitch.connect();
 
+    discord.on('join', (channel) => {
+        joinChannel(channel);
+    });
+    discord.on('remove', (channel) => {
+        leaveChannel(channel);
+        repo.removeLastInviteByChannel(channel);
+    });
+
     twitch.on('chat', async (channel, user, message, self) => {
         if(self) return;
         const messageParts = message.split(' ');
@@ -40,10 +48,34 @@ async function login() {
             return;
         }
 
-        const inviteURL = await discord.createInvite(channel, messageParts[2], messageParts[3]);
-        const targetUser = messageParts[1].replace('@', '');
+        const command = messageParts[1];
 
-        twitch.whisper(targetUser, `Here is your discord invite: ${inviteURL}`); // TODO: Currently not working. Twitch bot needs verification first.
+        if(command.startsWith('@')) {
+            const inviteURL = await discord.createInvite(channel, messageParts[2], messageParts[3]);
+            const targetUser = messageParts[1].replace('@', '');
+
+            twitch.whisper(targetUser, `Here is your discord invite: ${inviteURL}`);
+            twitch.say(channel, 'Sent the invite message.');
+        } else if(command === 'leave') {
+            const result = await repo.removeInvi(channel);
+            repo.removeLastInviteByChannel(channel);
+            if(result) {
+                twitch.say(channel, 'Goodbye everyone. :3');
+                twitch.part(channel);
+            } else {
+                twitch.say(channel, 'Oh no I could not leave this channel. :c');
+            }
+        } else if(command === 'purge') {
+            const lastInviteCode = await repo.getLastInvite(channel);
+            const result = await discord.deleteInvite(lastInviteCode);
+            if(result) {
+                twitch.say(channel, 'Deleted the last created invite.');
+            } else {
+                twitch.say(channel, 'Could not delete the last created invite.');
+            }
+        } else {
+            twitch.say(channel, 'To send an invite to a user, please prefix it with an @ character.');
+        }
     });
 }
 

@@ -56,8 +56,28 @@ async function createInvite(twitchChannel, maxUses, maxAge) {
     }
 
     const invite = await guild.systemChannel.createInvite(options);
+    repo.setLastInvite(twitchChannel.toLocaleLowerCase(), invite.code);
 
     return invite.url;
+}
+
+/**
+ * 
+ * @param {String} code 
+ */
+async function deleteInvite(code) {
+    try {
+        let invite = await client.fetchInvite(code);
+        invite = await invite.delete();
+        if(invite) {
+            repo.removeLastInvite(code);
+            return true;
+        }
+        return false;
+    } catch(error) {
+        console.log(error);
+        return false;
+    } 
 }
 
 client.on('guildMemberRemove', async (member) => {
@@ -98,6 +118,9 @@ client.on('message', (message) => {
         break;
     case 'update':
         updateOptions(member, guild, message, content.slice(2));
+        break;
+    case 'list':
+        listChannels(member, guild, message);
         break;
     case 'leave':
         removeChannel(member, guild, message, content.slice(2));
@@ -170,17 +193,18 @@ async function joinChannel(member, guild, message, args) {
         maxAge = 60 * parseInt(args[2], 10);
     }
 
+    const twitchChannel = args[0].toLocaleLowerCase();
     try {
-        await repo.createInvi(args[0], guild.id, maxUses, maxAge);
-        message.reply(`Joined twitch channel ${args[0]}.`);
-        callbackJoin(args[0]);
+        await repo.createInvi(twitchChannel, guild.id, maxUses, maxAge);
+        message.reply(`Joined twitch channel ${twitchChannel}.`);
+        callbackJoin(twitchChannel);
     } catch(error) {
         if(error.code === 11000) {
-            const guildID = (await repo.getInviByChannel(args[0])).guildID;
+            const guildID = (await repo.getInviByChannel(twitchChannel)).guildID;
             if(guild.id === guildID) {
-                message.reply(`I already joined the twitch channel ${args[0]}.`);
+                message.reply(`I already joined the twitch channel ${twitchChannel}.`);
             } else {
-                message.reply(`I already joined the twitch channel ${args[0]} on another server.`);
+                message.reply(`I already joined the twitch channel ${twitchChannel} on another server.`);
             }
         } else {
             message.reply('Oh no an unexpected error has happened :(. I\'m sry about this I hope I can do it next time :).');
@@ -208,11 +232,33 @@ async function updateOptions(member, guild, message, args) {
     const maxUses = parseInt(args[1], 10);
     const maxAge = 60 * parseInt(args[2], 10);
 
-    const result = await repo.updateInvi(args[0], maxUses, maxAge);
+    const twitchChannel = args[0].toLocaleLowerCase();
+    const result = await repo.updateInvi(twitchChannel, maxUses, maxAge);
     if(result == null) {
-        message.reply(`Couldn't find twitch channel ${args[0]}`);
+        message.reply(`Couldn't find twitch channel ${twitchChannel}`);
     } else {
         message.reply(`Updated twitch channel ${result.twitchChannel}`);
+    }
+}
+
+/**
+ * 
+ * @param {GuildMember} member 
+ * @param {Guild} guild 
+ * @param {Message} message 
+ */
+async function listChannels(member, guild, message) {
+    if(!isAdmin(member) && !(await hasRole(member, guild))) {
+        message.reply('You don\'t have the permissions to join a twitch channel.');
+        return;
+    }
+
+    const result = await repo.getChannelsByGuild(guild.id);
+    if(result.length === 0) {
+        message.reply('No twitch channels found for this server.');
+    } else {
+        const channelList = '- '.concat(result.join('\n- '));
+        message.reply(`Found the following twitch channles for this server: \n${channelList}`);
     }
 }
 
@@ -233,14 +279,15 @@ async function removeChannel(member, guild, message, args) {
         message.reply('You need to provide the twitch channel you want to leave.');
     }
 
-    const result = await repo.removeInvi(args[0], guild.id);
+    const twitchChannel = args[0].toLocaleLowerCase();
+    const result = await repo.removeInvi(twitchChannel.toLocaleLowerCase());
     if(result) {
-        message.reply(`Successfully left the twitch channel ${args[0]}.`);
+        message.reply(`Successfully left the twitch channel ${twitchChannel}.`);
         if(callbackRemove) {
-            callbackRemove(args[0]);
+            callbackRemove(twitchChannel);
         }
     } else {
-        message.reply(`Couldn't leave the twitch channel ${args[0]}.`);
+        message.reply(`Couldn't leave the twitch channel ${twitchChannel}.`);
     }
 }
 
@@ -272,4 +319,4 @@ async function hasRole(member, guild) {
     return member.roles.cache.has(roleID);
 }
 
-exports.discord = { createInvite, login, on };
+exports.discord = { createInvite, deleteInvite, login, on };
