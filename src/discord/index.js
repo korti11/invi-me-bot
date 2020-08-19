@@ -56,8 +56,28 @@ async function createInvite(twitchChannel, maxUses, maxAge) {
     }
 
     const invite = await guild.systemChannel.createInvite(options);
+    repo.setLastInvite(twitchChannel.toLocaleLowerCase(), invite.code);
 
     return invite.url;
+}
+
+/**
+ * 
+ * @param {String} code 
+ */
+async function deleteInvite(code) {
+    try {
+        let invite = await client.fetchInvite(code);
+        invite = await invite.delete();
+        if(invite) {
+            repo.removeLastInvite(code);
+            return true;
+        }
+        return false;
+    } catch(error) {
+        console.log(error);
+        return false;
+    } 
 }
 
 client.on('guildMemberRemove', async (member) => {
@@ -275,4 +295,4 @@ async function hasRole(member, guild) {
     return member.roles.cache.has(roleID);
 }
 
-exports.discord = { createInvite, login, on };
+exports.discord = { createInvite, deleteInvite, login, on };

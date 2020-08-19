@@ -49,14 +49,20 @@ async function login() {
             twitch.whisper(targetUser, `Here is your discord invite: ${inviteURL}`);
             twitch.say(channel, 'Sent the invite message.');
         } else if(command === 'leave') {
-            console.log(channel);
             const result = await repo.removeInvi(channel);
-            console.log(result);
             if(result) {
                 twitch.say(channel, 'Goodbye everyone. :3');
                 twitch.part(channel);
             } else {
                 twitch.say(channel, 'Oh no I could not leave this channel. :c');
+            }
+        } else if(command === 'purge') {
+            const lastInviteCode = await repo.getLastInvite(channel);
+            const result = await discord.deleteInvite(lastInviteCode);
+            if(result) {
+                twitch.say(channel, 'Deleted the last created invite.');
+            } else {
+                twitch.say(channel, 'Could not delete the last created invite.');
             }
         } else {
             twitch.say(channel, 'To send an invite to a user, please prefix it with an @ character.');

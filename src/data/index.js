@@ -26,6 +26,14 @@ const roleSchema = new Schema({
 const Role = model('Role', roleSchema);
 Role.createIndexes();
 
+const lastInviteSchema = new Schema({
+    twitchChannel: { type: String, index: true, unique: true },
+    code: { type: String, index: true, unique: true }
+});
+
+const LastInvite = model('LastInvite', lastInviteSchema);
+LastInvite.createIndexes();
+
 class Repository {
 
     /**
@@ -157,6 +165,46 @@ class Repository {
      */
     async removeRole(guildID) {
         const result = await Role.deleteOne({ guildID }).exec();
+        return Promise.resolve(result.deletedCount === 1);
+    }
+
+    /**
+     * 
+     * @param {String} twitchChannel 
+     */
+    async getLastInvite(twitchChannel) {
+        const document = await LastInvite.findOne({ twitchChannel }).exec();
+        if(document !== null && document !== undefined) {
+            return document.code;
+        } else {
+            return '';
+        }
+    }
+
+    /**
+     * 
+     * @param {String} twitchChannel 
+     * @param {String} inviteCode 
+     */
+    async setLastInvite(twitchChannel, inviteCode) {
+        let error = undefined;
+        const query = LastInvite.updateOne({ twitchChannel }, { code: inviteCode }, { upsert: true }, (err) => {
+            if(err) error = err;
+        });
+        await query.exec();
+        if(error) {
+            return Promise.reject(error);
+        } else {
+            return Promise.resolve();
+        }
+    }
+
+    /**
+     * 
+     * @param {String} inviteCode 
+     */
+    async removeLastInvite(inviteCode) {
+        const result = await LastInvite.deleteOne({ code: inviteCode }).exec();
         return Promise.resolve(result.deletedCount === 1);
     }
 
