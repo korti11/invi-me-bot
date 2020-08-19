@@ -58,6 +58,7 @@ async function login() {
             twitch.say(channel, 'Sent the invite message.');
         } else if(command === 'leave') {
             const result = await repo.removeInvi(channel);
+            repo.removeLastInviteByChannel(channel);
             if(result) {
                 twitch.say(channel, 'Goodbye everyone. :3');
                 twitch.part(channel);
