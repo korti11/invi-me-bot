@@ -1,6 +1,6 @@
 {
   "name": "invi-me-bot",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A small bot to create discord one time invites within twitch chat.",
   "main": "src/index.js",
   "scripts": {
