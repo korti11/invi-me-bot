@@ -4,6 +4,9 @@
 ## Description
 Invi Me is a small little bot that can create Discord invites within Twitch chat and whisper it to the target user.
 
+## Changelog
+You can see the latest changelog [here](https://github.com/korti11/invi-me-bot/blob/release/CHANGELOG.md)
+
 ## Usage
 To add the bot to your Twitch channel follow these three small steps.
 
