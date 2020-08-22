@@ -57,7 +57,7 @@ async function login() {
             twitch.whisper(targetUser, `Here is your discord invite: ${inviteURL}`);
             twitch.say(channel, 'Sent the invite message.');
         } else if(command === 'leave') {
-            const result = await repo.removeInvi(channel);
+            const result = await repo.removeInviByChannel(channel);
             repo.removeLastInviteByChannel(channel);
             if(result) {
                 twitch.say(channel, 'Goodbye everyone. :3');

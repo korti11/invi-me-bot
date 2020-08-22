@@ -90,13 +90,14 @@ class Repository {
     /**
      * 
      * @param {String} twitchChannel 
+     * @param {String} guildID
      * @param {Number} maxUses 
      * @param {Number} maxAge 
      * @returns {Promise<Invi | Any>}
      */
-    async updateInvi(twitchChannel, maxUses, maxAge) {
+    async updateInvi(twitchChannel, guildID, maxUses, maxAge) {
         let error = undefined;
-        const query = Invi.findOneAndUpdate({ twitchChannel }, { inviteOptions: { maxUses, maxAge } }, { useFindAndModify: false }, (err) => {
+        const query = Invi.findOneAndUpdate({ twitchChannel, guildID }, { inviteOptions: { maxUses, maxAge } }, { useFindAndModify: false }, (err) => {
             if(err) error = err;
         });
         const result = await query.exec();
@@ -112,8 +113,19 @@ class Repository {
      * @param {String} twitchChannel 
      * @returns {Promise<Boolean>}
      */
-    async removeInvi(twitchChannel) {
+    async removeInviByChannel(twitchChannel) {
         const result = await Invi.deleteOne({ twitchChannel }).exec();
+        return Promise.resolve(result.deletedCount === 1);
+    }
+
+    /**
+     *  
+     * @param {String} twitchChannel 
+     * @param {String} guildID
+     * @returns {Promise<Boolean>}
+     */
+    async removeInvi(twitchChannel, guildID) {
+        const result = await Invi.deleteOne({ twitchChannel, guildID }).exec();
         return Promise.resolve(result.deletedCount === 1);
     }
 

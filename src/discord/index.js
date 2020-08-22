@@ -233,7 +233,7 @@ async function updateOptions(member, guild, message, args) {
     const maxAge = 60 * parseInt(args[2], 10);
 
     const twitchChannel = args[0].toLocaleLowerCase();
-    const result = await repo.updateInvi(twitchChannel, maxUses, maxAge);
+    const result = await repo.updateInvi(twitchChannel, guild.id, maxUses, maxAge);
     if(result == null) {
         message.reply(`Couldn't find twitch channel ${twitchChannel}`);
     } else {
@@ -280,7 +280,7 @@ async function removeChannel(member, guild, message, args) {
     }
 
     const twitchChannel = args[0].toLocaleLowerCase();
-    const result = await repo.removeInvi(twitchChannel.toLocaleLowerCase());
+    const result = await repo.removeInvi(twitchChannel.toLocaleLowerCase(), guild.id);
     if(result) {
         message.reply(`Successfully left the twitch channel ${twitchChannel}.`);
         if(callbackRemove) {
