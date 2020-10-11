@@ -1,4 +1,8 @@
 # Changelog
+## Version 0.3.2 - 11. Oct 2020
+## Security updates
+- Updated dependency bl from 2.2.0 to 2.2.1.
+- Updated dependency node-fetch from 2.6.0 to 2.6.1.
 ## Version 0.3.1 - 22. Aug 2020
 ### Discord Bot
 - Fixed leaving a channel that was joined on a different server again. Idk why this was reverted.
