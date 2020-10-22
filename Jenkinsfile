@@ -29,6 +29,7 @@ pipeline {
                     -f "HTML"
                     -f "XML"
                     --prettyPrint
+                    --nodeAuditSkipDevDependencies
                 ''', odcInstallation: 'DependencyCheck 6.0'
                 //dependencyCheckPublisher pattern: 'dependency-check-report.html'
                 withSonarQubeEnv('korti.io') {
