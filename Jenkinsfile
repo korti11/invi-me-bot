@@ -9,6 +9,17 @@ pipeline {
             }
         }
 
+        stage('Code quality') {
+            steps {
+                withSonarQubeEnv('korti.io') {
+                    script {
+                        def scannerHome = tool 'SonarScanner 4.5'
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
+                }
+            }
+        }
+
         stage('Build image') {
             steps {
                 script {
@@ -28,6 +39,14 @@ pipeline {
                             app.push("latest")
                         }
                     }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
