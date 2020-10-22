@@ -20,7 +20,7 @@ pipeline {
             }
             steps {
                 script {
-                    sh "npm install"
+                    sh "npm ci --production"
                 }
                 dependencyCheck additionalArguments: '''
                     -o "./"
