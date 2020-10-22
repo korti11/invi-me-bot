@@ -16,6 +16,9 @@ pipeline {
                     }
                 }
             steps {
+                script {
+                    sh "npm install"
+                }
                 dependencyCheck additionalArguments: '''
                     -o "./"
                     -s "./"
@@ -23,7 +26,7 @@ pipeline {
                     -f "HTML"
                     --prettyPrint
                 ''', odcInstallation: 'DependencyCheck 6.0'
-                dependencyCheckPublisher pattern: 'dependency-check-report.html'
+                //dependencyCheckPublisher pattern: 'dependency-check-report.html'
                 withSonarQubeEnv('korti.io') {
                     script {
                         def scannerHome = tool 'SonarScanner 4.5'
