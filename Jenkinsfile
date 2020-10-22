@@ -10,6 +10,11 @@ pipeline {
         }
 
         stage('Code quality') {
+            agent {
+                    docker {
+                        image 'node:lts'
+                    }
+                }
             steps {
                 withSonarQubeEnv('korti.io') {
                     script {
