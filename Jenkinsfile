@@ -12,7 +12,7 @@ pipeline {
         stage('Code quality') {
             agent {
                     docker {
-                        image 'node:lts'
+                        image 'timbru31/java-node:8-slim-jre'
                     }
                 }
             steps {
