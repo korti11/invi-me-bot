@@ -27,6 +27,7 @@ pipeline {
                     -s "./"
                     -f "JSON"
                     -f "HTML"
+                    -f "XML"
                     --prettyPrint
                 ''', odcInstallation: 'DependencyCheck 6.0'
                 //dependencyCheckPublisher pattern: 'dependency-check-report.html'
