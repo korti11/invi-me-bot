@@ -1,6 +1,13 @@
 # invi-me-bot
+## Builds
 [![Build Status](https://jenkins.korti.io/job/invi-me-bot/job/master/badge/icon?style=flat-square&subject=Dev%20build)](https://jenkins.korti.io/job/invi-me-bot/job/master/)
 [![Build Status](https://jenkins.korti.io/job/invi-me-bot/job/release/badge/icon?style=flat-square&subject=Release%20build)](https://jenkins.korti.io/job/invi-me-bot/job/release/)
+## Code Quality
+[![Quality Gate Status](https://sonarqube.korti.io/api/project_badges/measure?project=invi-me-bot&metric=alert_status)](https://sonarqube.korti.io/dashboard?id=invi-me-bot)
+[![Maintainability Rating](https://sonarqube.korti.io/api/project_badges/measure?project=invi-me-bot&metric=sqale_rating)](https://sonarqube.korti.io/dashboard?id=invi-me-bot)
+[![Security Rating](https://sonarqube.korti.io/api/project_badges/measure?project=invi-me-bot&metric=security_rating)](https://sonarqube.korti.io/dashboard?id=invi-me-bot)
+[![Bugs](https://sonarqube.korti.io/api/project_badges/measure?project=invi-me-bot&metric=bugs)](https://sonarqube.korti.io/dashboard?id=invi-me-bot)
+[![Vulnerabilities](https://sonarqube.korti.io/api/project_badges/measure?project=invi-me-bot&metric=vulnerabilities)](https://sonarqube.korti.io/dashboard?id=invi-me-bot)
 ## Description
 Invi Me is a small little bot that can create Discord invites within Twitch chat and whisper it to the target user.
 
