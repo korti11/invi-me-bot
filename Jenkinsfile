@@ -14,7 +14,10 @@ pipeline {
                     docker {
                         image 'timbru31/java-node:8-slim-jre'
                     }
-                }
+            }
+            environment {
+               HOME = '.'
+            }
             steps {
                 script {
                     sh "npm install"
