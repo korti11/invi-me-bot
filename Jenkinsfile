@@ -16,6 +16,14 @@ pipeline {
                     }
                 }
             steps {
+                dependencyCheck additionalArguments: '''
+                    -o "./"
+                    -s "./"
+                    -f "JSON"
+                    -f "HTML"
+                    --prettyPrint
+                ''', odcInstallation: 'DependencyCheck 6.0'
+                dependencyCheckPublisher pattern: 'dependency-check-report.html'
                 withSonarQubeEnv('korti.io') {
                     script {
                         def scannerHome = tool 'SonarScanner 4.5'
