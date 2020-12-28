@@ -105,6 +105,3 @@ dist
 
 # Config
 config/invi.conf.json
-
-# SonarQube
-.scannerwork

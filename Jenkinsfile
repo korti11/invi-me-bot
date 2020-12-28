@@ -9,38 +9,6 @@ pipeline {
             }
         }
 
-        stage('Code quality') {
-            agent {
-                    docker {
-                        image 'timbru31/java-node:8-slim-jre'
-                    }
-            }
-            environment {
-               HOME = '.'
-            }
-            steps {
-                script {
-                    sh "npm ci --production"
-                }
-                dependencyCheck additionalArguments: '''
-                    -o "./"
-                    -s "./"
-                    -f "JSON"
-                    -f "HTML"
-                    -f "XML"
-                    --prettyPrint
-                    --nodeAuditSkipDevDependencies
-                ''', odcInstallation: 'DependencyCheck 6.0'
-                //dependencyCheckPublisher pattern: 'dependency-check-report.html'
-                withSonarQubeEnv('korti.io') {
-                    script {
-                        def scannerHome = tool 'SonarScanner 4.5'
-                        sh "${scannerHome}/bin/sonar-scanner"
-                    }
-                }
-            }
-        }
-
         stage('Build image') {
             steps {
                 script {
@@ -60,14 +28,6 @@ pipeline {
                             app.push("latest")
                         }
                     }
-                }
-            }
-        }
-
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 1, unit: 'HOURS') {
-                    waitForQualityGate abortPipeline: true
                 }
             }
         }
