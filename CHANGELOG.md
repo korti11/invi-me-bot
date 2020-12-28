@@ -1,6 +1,14 @@
 # Changelog
+## Version 0.3.3 - 28. Dec 2020
+### Security updates
+- Updated dependency ini from 1.3.5 to 1.3.8.
+- Updated dependency discord.js from 12.2.0 to 12.5.1.
+- Updated dependency mongoose from 5.9.25 to 5.11.8.
+- Updated dependency tmi.js from 1.5.0 to 1.7.1.
+- Updated dev dependency eslint from 7.5.0 to 7.16.0.
+- Updated dev dependency nodemon from 2.0.4 to 2.0.6.
 ## Version 0.3.2 - 11. Oct 2020
-## Security updates
+### Security updates
 - Updated dependency bl from 2.2.0 to 2.2.1.
 - Updated dependency node-fetch from 2.6.0 to 2.6.1.
 ## Version 0.3.1 - 22. Aug 2020
