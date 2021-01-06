@@ -6,7 +6,7 @@ const { isFunction } = require('../util');
 
 const client = new Client();
 const commands = new Map();
-const commandPrefix = '!ty';
+const commandPrefix = config.command_prefix;
 const data = new Repository();
 
 function init() {
@@ -32,14 +32,14 @@ function messageHandler(message) {
 
     if(prefix !== commandPrefix) return;
     if(content.length < 2) {
-        message.reply('No command provided!');
+        message.reply('no command provided!');
     }
 
     const command = content[1];
     const args = content.slice(2);
 
     if(!commands.has(command)) {
-        message.reply(`There is no command ${command}!`);
+        message.reply(`there is no command ${command}!`);
         return;
     }
 
@@ -67,7 +67,10 @@ function guildMemberRemoveHandler(member) {
  */
 function registerCommand(command, runnable) {
     if(!isFunction(runnable)) {
-        throw new Error('Given runnable is not a function');
+        throw new Error('Given runnable is not a function!');
+    }
+    if(commands.has(command)) {
+        throw new Error(`${command} already registered!`);
     }
     commands.set(command, runnable);
 }

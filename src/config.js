@@ -2,6 +2,7 @@ const fs = require('fs');
 
 const configFile = './config/invi.conf.json';
 const config = {
+    command_prefix: '!ty',
     discord_token: '',
     twitch_user: '',
     twitch_token: '',
