@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-const { Client, GuildMember, Permissions, Message } = require('discord.js');
+const { Client, Guild, GuildMember, Permissions, Message } = require('discord.js');
 const { config } = require('../config');
 const { Repository } = require('../data');
 const { isFunction } = require('../util');
@@ -72,6 +72,7 @@ function registerCommand(command, runnable) {
     if(commands.has(command)) {
         throw new Error(`${command} already registered!`);
     }
+    console.log(`Register command: ${command}`);
     commands.set(command, runnable);
 }
 
@@ -101,4 +102,21 @@ function isAdmin(member) {
     return hasPermission(member, Permissions.FLAGS.ADMINISTRATOR);
 }
 
-exports.discord = { init, isAdmin, hasPermission, hasRole, registerCommand, registerEvent: client.on };
+/**
+ * Checks if the given member is admin of the guild or has the given role.
+ * @param {GuildMember} member Guild member to check if he has the admin permission or has the given role.
+ * @param {String} roleID The id of the role to check.
+ */
+function isAdminOrHasRole(member, roleID) {
+    return isAdmin(member) || hasRole(member, roleID);
+}
+
+/**
+ * Gets the edit role id for the given guild.
+ * @param {Guild} guild The guild to the the edit role for.
+ */
+async function getEditRole(guild) {
+    return data.getRole(guild.id);
+}
+
+exports.discord = { init, isAdmin, isAdminOrHasRole, hasPermission, hasRole, getEditRole, registerCommand, registerEvent: client.on };

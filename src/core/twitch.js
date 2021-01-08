@@ -7,7 +7,7 @@ const { isFunction } = require('../util');
 let chatClient;
 const commands = new Map();
 const commandPrefix = config.command_prefix;
-const repo = new Repository();
+const data = new Repository();
 
 async function init() {
     const options = {
@@ -22,7 +22,7 @@ async function init() {
             username: config.twitch_user,
             password: config.twitch_token
         },
-        channels: await repo.getAllChannels()
+        channels: await data.getAllChannels()
     };
 
     chatClient = new Client(options);
@@ -89,4 +89,29 @@ function isBroadcaster(channel, user) {
     return channel.replace('#', '') === user.username;
 }
 
-exports.twitch = { init, isBroadcaster, registerCommand, joinChannel: chatClient.join, leaveChannel: chatClient.leave, say: chatClient.say };
+/**
+ * Joins the given Twitch channel.
+ * @param {String} channel Channel name the bot should join.
+ */
+function joinChannel(channel) {
+    chatClient.join(channel);
+}
+
+/**
+ * Leaves the given Twitch channel.
+ * @param {String} channel Channel name the bot should leave.
+ */
+function leaveChannel(channel) {
+    chatClient.leave(channel);
+}
+
+/**
+ * Says the given message in the given channel.
+ * @param {String} channel Channel name where the message should be said.
+ * @param {String} message The message that should be said.
+ */
+function say(channel, message) {
+    chatClient.say(channel, message);
+}
+
+exports.twitch = { init, isBroadcaster, registerCommand, joinChannel, leaveChannel, say };
