@@ -8,6 +8,7 @@ const client = new Client();
 const commands = new Map();
 const commandPrefix = config.command_prefix;
 const data = new DiscordData();
+const leaveHandler = [];
 
 function init() {
     client.login(config.discord_token);
@@ -62,6 +63,7 @@ function guildCreateHandler(guild) {
 function guildDeleteHandler(guild) {
     console.log('I got removed oh no :(');
     data.removeDiscordGuild(guild.id);
+    leaveHandler.forEach(runnable => runnable(guild));
 }
 
 // Discord util functions
@@ -80,6 +82,17 @@ function registerCommand(command, runnable) {
     }
     console.log(`Register command: ${command}`);
     commands.set(command, runnable);
+}
+
+/**
+ * Register a new leave handler for Discord.
+ * @param {Function} runnable Function object that is called if the bot leaves a guild.
+ */
+function registerLeaveHandler(runnable) {
+    if(!isFunction(runnable)) {
+        throw new Error('Given runnable is not a function!');
+    }
+    leaveHandler.push(runnable);
 }
 
 /**
@@ -125,4 +138,4 @@ async function getEditRole(guild) {
     return data.getRole(guild.id);
 }
 
-exports.discord = { init, isAdmin, isAdminOrHasRole, hasPermission, hasRole, getEditRole, registerCommand, registerEvent: client.on };
+exports.discord = { init, isAdmin, isAdminOrHasRole, hasPermission, hasRole, getEditRole, registerCommand, registerLeaveHandler, registerEvent: client.on };

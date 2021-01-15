@@ -9,6 +9,7 @@ const data = new InviteData();
 function init() {
     console.log('Register invite handlers.');
     discord.registerCommand('invite', discordInviteHandler);
+    discord.registerLeaveHandler(discordLeaveHandler);
 }
 
 /**
@@ -119,6 +120,15 @@ function getUsages(args) {
     if(index === -1) index = args.indexOf('--time');
     if(index === -1) return 1;
     return parseInt(args[index + 1], 10);
+}
+
+/**
+ * Handler for leaving the given Discord guild.
+ * @param {Guild} guild Guild that the bot leaves.
+ */
+function discordLeaveHandler(guild) {
+    console.log('Removing all invites!');
+    data.removeInvites(guild.id);
 }
 
 exports.invite = { init };
