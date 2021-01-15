@@ -1,19 +1,20 @@
 // eslint-disable-next-line no-unused-vars
 const { Client, Guild, GuildMember, Permissions, Message } = require('discord.js');
 const { config } = require('../config');
-const { Repository } = require('../data');
+const { DiscordData } = require('../data/discord');
 const { isFunction } = require('../util');
 
 const client = new Client();
 const commands = new Map();
 const commandPrefix = config.command_prefix;
-const data = new Repository();
+const data = new DiscordData();
 
 function init() {
     client.login(config.discord_token);
 
     client.on('message', messageHandler);
-    client.on('guildMemberRemove', guildMemberRemoveHandler);
+    client.on('guildCreate', guildCreateHandler);
+    client.on('guildDelete', guildDeleteHandler);
 }
 
 /**
@@ -47,15 +48,20 @@ function messageHandler(message) {
 }
 
 /**
- * Handler function for the 'guildMemberRemove' event.
- * @param {GuildMember} member Guild member that is going to get removed.
+ * Handler function for the 'guildCreate' event.
+ * @param {Guild} guild The guild the bot joins.
  */
-function guildMemberRemoveHandler(member) {
-    const bot = client.user;
-    if(bot.id === member.id) {  // Ignore everyone else then the bot it self
-        console.log('I got removed oh no :(');
-        data.removeRole(member.guild.id);
-    }
+function guildCreateHandler(guild) {
+    data.createDiscordGuild(guild);
+}
+
+/**
+ * Handler function for the 'guildDelete' event.
+ * @param {Guild} guild The guild the bot leaves.
+ */
+function guildDeleteHandler(guild) {
+    console.log('I got removed oh no :(');
+    data.removeDiscordGuild(guild.id);
 }
 
 // Discord util functions
