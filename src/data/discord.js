@@ -1,12 +1,16 @@
 const { Schema, model } = require('mongoose');
 
-const discordGuildSchema = new Schema({
-    guild: { type: String, index: true, unique: true },
-    role: String
-});
+let DiscordGuild;
 
-const DiscordGuild = model('DiscordGuild', discordGuildSchema);
-DiscordGuild.createIndexes();
+function init() {
+    const discordGuildSchema = new Schema({
+        guild: { type: String, index: true, unique: true },
+        role: String
+    });
+    
+    DiscordGuild = model('DiscordGuild', discordGuildSchema);
+    DiscordGuild.createIndexes();
+}
 
 class DiscordData {
 
@@ -55,4 +59,5 @@ class DiscordData {
 
 }
 
+exports.discord = { init };
 exports.DiscordData = DiscordData;

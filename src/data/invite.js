@@ -1,25 +1,30 @@
 const { Schema, model } = require('mongoose');
 
-const inviteSchema = new Schema({
-    twitchChannel: { type: String, index: true, unique: true },
-    guild: { type: String, index: true },
-    options: {
-        usages: Number,
-        time: Number,
-        mode: Number
-    }
-});
+let Invite;
+let LastInvite;
 
-const Invite = model('Invite', inviteSchema);
-Invite.createIndexes();
-
-const lastInviteSchema = new Schema({
-    twitchChannel: { type: String, index: true, unique: true },
-    code: { type: String, unique: true }
-});
-
-const LastInvite = model('LastInvite', lastInviteSchema);
-LastInvite.createIndexes();
+function init() {
+    const inviteSchema = new Schema({
+        twitchChannel: { type: String, index: true, unique: true },
+        guild: { type: String, index: true },
+        options: {
+            usages: Number,
+            time: Number,
+            mode: Number
+        }
+    });
+    
+    Invite = model('Invite', inviteSchema);
+    Invite.createIndexes();
+    
+    const lastInviteSchema = new Schema({
+        twitchChannel: { type: String, index: true, unique: true },
+        code: { type: String, unique: true }
+    });
+    
+    LastInvite = model('LastInvite', lastInviteSchema);
+    LastInvite.createIndexes();
+}
 
 class InviteData {
 
@@ -33,7 +38,7 @@ class InviteData {
     }
 
     /**
-     * Returns the all twitch channels for the given Discord guild from the database.
+     * Returns the all Twitch channels for the given Discord guild from the database.
      * @param {String} guild ID of the Discord guild.
      * @returns {String[]} Found Twitch channels.
      */
@@ -139,4 +144,5 @@ class InviteData {
     }
 }
 
+exports.invite = { init };
 exports.InviteData = InviteData;

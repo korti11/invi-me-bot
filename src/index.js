@@ -7,12 +7,16 @@ const { twitch } = require('./core/twitch');
 const { invite } = require('./commands/invite');
 
 (async () => {
+    // Load config
     loadConfig();
-    connectToDB();
-    //discord.login();
-    discord.init();
-    //twitch.login();
-    twitch.init();
 
+    // Connect to the database
+    connectToDB();
+
+    // Init commands
     invite.init();
+
+    // Init bots
+    discord.init();
+    twitch.init();
 })();

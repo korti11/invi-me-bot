@@ -1,13 +1,13 @@
 // eslint-disable-next-line no-unused-vars
 const { Client, ChatUserstate } = require('tmi.js');
 const { config } = require('../config');
-const { Repository } = require('../data');
+const { TwitchData } = require('../data/twitch');
 const { isFunction } = require('../util');
 
 let chatClient;
 const commands = new Map();
 const commandPrefix = config.command_prefix;
-const data = new Repository();
+const data = new TwitchData();
 
 async function init() {
     const options = {
