@@ -16,12 +16,13 @@ function init() {
  * Handler function for the 'invite' command.
  * 
  * Usage
- * !ty invite <channel_name> [arguments]
+ * !ty invite <channel_name>|list [arguments]
  * 
  * Command parameters
+ * list                     List all Twitch channels.
  * <channel_name>           Twitch channel.
  * 
- * Command arguments
+ * <channel_name> command arguments
  * -c |--chat               Send invite over twitch chat.
  * -cp|--channelpoints      Send invite with channel points redemption.
  * -t |--time <number>      Time until invite is invalid.
@@ -40,7 +41,18 @@ async function discordInviteHandler(guild, member, message, args) {
     }
 
     if(args.length === 0) {
-        message.reply('no twitch channel provided.');
+        message.reply('no command parameters provided.');
+        return;
+    }
+
+    if(args[0] === 'list') {
+        const channels = await data.getChannels(guild.id);
+        if(channels.length === 0) {
+            message.channel.send('No Twitch channels found for this server.');
+        } else {
+            const channelList = '- '.concat(channels.join('\n- '));
+            message.channel.send(`Found the following Twitch channels for this server: \n${channelList}`);
+        }
         return;
     }
 

@@ -33,6 +33,15 @@ class InviteData {
     }
 
     /**
+     * Returns the all twitch channels for the given Discord guild from the database.
+     * @param {String} guild ID of the Discord guild.
+     * @returns {String[]} Found Twitch channels.
+     */
+    async getChannels(guild) {
+        return await (await Invite.find({ guild }).exec()).map(invite => invite.twitchChannel);
+    }
+
+    /**
      * Creates a new invite object in the database.
      * @param {String} twitchChannel Name of the Twitch channel.
      * @param {String} guild ID of the Discord guild.
