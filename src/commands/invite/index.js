@@ -2,9 +2,9 @@
 const { Guild, GuildMember, Message } = require('discord.js');
 const { discord } = require('../../core/discord');
 const { twitch } = require('../../core/twitch');
-const { Repository } = require('../../data');
+const { InviteData } = require('../../data/invite');
 
-const repo = new Repository();
+const data = new InviteData();
 
 function init() {
     console.log('Register invite handlers.');
@@ -59,7 +59,7 @@ async function discordInviteHandler(guild, member, message, args) {
     }
 
     if(off) {
-        const result = await repo.removeInvi(channelName, guild.id);
+        const result = await data.removeInvite(channelName, guild.id);
         if(result) {
             message.channel.send(`Invites are off now for the Twitch channel ${channelName}.`);
             twitch.leaveChannel(channelName);
@@ -74,8 +74,18 @@ async function discordInviteHandler(guild, member, message, args) {
         return;
     }
 
+    let mode = 0;
+
+    if(chat) {
+        mode += 1;
+    }
+
+    if(channelPoints) {
+        mode += 2;
+    }
+
     try {
-        await repo.createInvi(channelName, guild.id, usages, time);
+        await data.createInvite(channelName, guild.id, usages, time, mode);
         message.channel.send(`Invites for the Twitch channel ${channelName} are now enabled.`);
         if(chat) {
             twitch.joinChannel(channelName);
