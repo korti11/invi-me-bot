@@ -1,7 +1,13 @@
 {
-    "discord_toke": "",
-    "twitch_user": "",
-    "twitch_token": "",
-    "twitch_debug": false,
-    "mongo_db": ""
+    "database": {
+        "host": ""
+    },
+    "discord": {
+        "token": ""
+    },
+    "twitch": {
+        "user": "",
+        "token": "",
+        "debug": true
+    }
 }

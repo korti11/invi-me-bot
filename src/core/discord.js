@@ -11,7 +11,7 @@ const data = new DiscordData();
 const leaveHandler = [];
 
 function init() {
-    client.login(config.discord_token);
+    client.login(config.discord.token);
 
     client.on('message', messageHandler);
     client.on('guildCreate', guildCreateHandler);

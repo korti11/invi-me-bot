@@ -3,11 +3,17 @@ const fs = require('fs');
 const configFile = './config/invi.conf.json';
 const config = {
     command_prefix: '!ty',
-    discord_token: '',
-    twitch_user: '',
-    twitch_token: '',
-    twitch_debug: false,
-    mongo_db: ''
+    database: {
+        host: ''
+    },
+    discord: {
+        token: ''
+    },
+    twitch: {
+        user: '',
+        token: '',
+        debug: ''
+    }
 };
 
 function loadConfig() {

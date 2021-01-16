@@ -12,15 +12,15 @@ const data = new TwitchData();
 async function init() {
     const options = {
         options: {
-            debug: config.twitch_debug
+            debug: config.twitch.debug
         },
         connection: {
             reconnect: true,
             secure: true
         },
         identity: {
-            username: config.twitch_user,
-            password: config.twitch_token
+            username: config.twitch.user,
+            password: config.twitch.token
         },
         channels: await data.getAllChannels()
     };

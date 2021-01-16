@@ -5,7 +5,7 @@ const { invite } = require('./invite');
 const { twitch } = require('./twitch');
 
 function connectToDB() {
-    connect(config.mongo_db, { useNewUrlParser: true, useUnifiedTopology: true, autoIndex: false });
+    connect(config.database.host, { useNewUrlParser: true, useUnifiedTopology: true, autoIndex: false });
 
     // Command data
     invite.init();
