@@ -23,11 +23,12 @@ function init() {
  * <channel_name>           Twitch channel.
  * 
  * <channel_name> command arguments
- * -c |--chat               Send invite over twitch chat.
+ * -c |--chat               Send invite over Twitch chat.
  * -cp|--channelpoints      Send invite with channel points redemption.
  * -t |--time <number>      Time until invite is invalid.
  * -u |--usages <number>    How often a invite can be used.
- * -o |--off                Disables the invites for the given twitch channel.
+ * -o |--off                Disables the invites for the given Twitch channel.
+ * -i |--info               Displays current invite options for given Twitch channel.
  * 
  * @param {Guild} guild Guild where the command got executed on.
  * @param {GuildMember} member The member who used the command.
@@ -65,6 +66,7 @@ async function discordInviteHandler(guild, member, message, args) {
     const time = getTime(args);
     const usages = getUsages(args);
     const off = args.includes('-o') || args.includes('--off');
+    const info = args.includes('-i') || args.includes('--info');
 
     if(channelName.length < 2) {
         message.reply('no twitch channel provided.');
@@ -83,6 +85,35 @@ async function discordInviteHandler(guild, member, message, args) {
         return;
     }
 
+    // Update invites for given Twitch channel
+    if(await data.hasChannel(channelName, guild.id)) {
+        if(info) {
+            const invite = await data.getInvite(channelName);
+            const usages = invite.options.usages;
+            const time = invite.options.time;
+            let mode;
+            if(invite.options.mode === 1) {
+                mode = 'chat';
+            } else if(invite.options.mode === 2) {
+                mode = 'channel points';
+            } else {
+                mode = 'chat and channel points';
+            }
+            message.channel.send(`Invites for Twitch channel ${channelName} have ${usages} usages, a valid time of ${time / 60} mins and are available over ${mode}.`);
+        } else {
+            data.updateInvite(channelName, guild.id,
+                getUsagesOrUndefined(args), getTimeOrUndefined(args), undefined);
+            message.channel.send(`Updated invite options for the Twitch channel ${channelName}.`);
+        }
+        return;
+    }
+
+    // Create invites for given Twitch channel
+    if(!chat && !channelPoints) {
+        message.reply('you need to provide at least "-c" or "-cp" or both.');
+        return;
+    }
+
     let mode = 0;
 
     if(chat) {
@@ -91,20 +122,6 @@ async function discordInviteHandler(guild, member, message, args) {
 
     if(channelPoints) {
         mode += 2;
-    }
-
-    // Update invites for given Twitch channel
-    if(await data.hasChannel(channelName, guild.id)) {
-        data.updateInvite(channelName, guild.id,
-            getUsagesOrUndefined(args), getTimeOrUndefined(args), undefined);
-        message.channel.send(`Updated invite options for the Twitch channel ${channelName}.`);
-        return;
-    }
-
-    // Create invites for given Twitch channel
-    if(!chat && !channelPoints) {
-        message.reply('you need to provide at least "-c" or "-cp" or both.');
-        return;
     }
 
     try {
