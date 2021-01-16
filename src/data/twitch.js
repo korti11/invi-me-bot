@@ -14,7 +14,7 @@ class TwitchData {
      * @returns {String[]} All Twitch channels.
      */
     async getAllChannels() {
-        return await Invite.find().lean().map(invite => invite.twitchChannel);
+        return (await Invite.find().lean()).map(invite => invite.twitchChannel);
     }
 
 }
