@@ -71,6 +71,7 @@ async function discordInviteHandler(guild, member, message, args) {
         return;
     }
 
+    // Remove invites for given Twitch channel
     if(off) {
         const result = await data.removeInvite(channelName, guild.id);
         if(result) {
@@ -82,11 +83,6 @@ async function discordInviteHandler(guild, member, message, args) {
         return;
     }
 
-    if(!chat && !channelPoints) {
-        message.reply('you need to provide at least "-c" or "-cp" or both.');
-        return;
-    }
-
     let mode = 0;
 
     if(chat) {
@@ -95,6 +91,20 @@ async function discordInviteHandler(guild, member, message, args) {
 
     if(channelPoints) {
         mode += 2;
+    }
+
+    // Update invites for given Twitch channel
+    if(await data.hasChannel(channelName, guild.id)) {
+        data.updateInvite(channelName, guild.id,
+            getUsagesOrUndefined(args), getTimeOrUndefined(args), undefined);
+        message.channel.send(`Updated invite options for the Twitch channel ${channelName}.`);
+        return;
+    }
+
+    // Create invites for given Twitch channel
+    if(!chat && !channelPoints) {
+        message.reply('you need to provide at least "-c" or "-cp" or both.');
+        return;
     }
 
     try {
@@ -115,12 +125,34 @@ async function discordInviteHandler(guild, member, message, args) {
 /**
  * Get the value for the time argument.
  * @param {String[]} args Command arguments.
+ * @returns {Number|undefined} Returns the given time in seconds from the arguments if -t or --time is present, otherwise undefined.
  */
-function getTime(args) {
+function getTimeOrUndefined(args) {
     let index = args.indexOf('-t');
     if(index === -1) index = args.indexOf('--time');
-    if(index === -1) return 60 * 15;
+    if(index === -1) return undefined;
     return 60 * parseInt(args[index + 1], 10);
+}
+
+/**
+ * Get the value for the time argument.
+ * @param {String[]} args Command arguments.
+ * @returns {Number} Returns the given time in seconds from the arguments if -t or --time is present, otherwise 15 mins in seconds.
+ */
+function getTime(args) {
+    const value = getTimeOrUndefined(args);
+    return value !== undefined ? value : 60 * 15;
+}
+
+/**
+ * Get the value for the usages argument.
+ * @param {String[]} args Command arguments.
+ */
+function getUsagesOrUndefined(args) {
+    let index = args.indexOf('-u');
+    if(index === -1) index = args.indexOf('--usages');
+    if(index === -1) return undefined;
+    return parseInt(args[index + 1], 10);
 }
 
 /**
@@ -128,10 +160,8 @@ function getTime(args) {
  * @param {String[]} args Command arguments.
  */
 function getUsages(args) {
-    let index = args.indexOf('-t');
-    if(index === -1) index = args.indexOf('--time');
-    if(index === -1) return 1;
-    return parseInt(args[index + 1], 10);
+    const value = getUsagesOrUndefined(args);
+    return value !== undefined ? value : 1;
 }
 
 /**

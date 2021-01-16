@@ -47,6 +47,16 @@ class InviteData {
     }
 
     /**
+     * Checks if a Invite object is present for the given Twitch channel and Discord guild.
+     * @param {String} twitchChannel Name of the Twitch channel.
+     * @param {String} guild ID of the Discord guild.
+     */
+    async hasChannel(twitchChannel, guild) {
+        const result = await Invite.findOne({ twitchChannel, guild }).lean();
+        return result !== null;
+    }
+
+    /**
      * Creates a new invite object in the database.
      * @param {String} twitchChannel Name of the Twitch channel.
      * @param {String} guild ID of the Discord guild.
