@@ -1,6 +1,9 @@
 const { Guild, GuildMember, Message } = require("discord.js");
 const { discord } = require("../../core/discord");
 const { twitch } = require("../../core/twitch");
+const { AuthData } = require("../../data/auth");
+
+const data = new AuthData();
 
 function init() {
     console.log('Register auth handlers.');
@@ -33,7 +36,18 @@ async function discordAuthHandler(guild, member, message, args) {
     }
 
     const channelName = args[0].replace('#', '').toLocaleLowerCase();
-    const { oAuthUri, stateToken } = twitch.generateOAuthUri();
+    
+    if(await data.hasAuthState(channelName)) {
+        message.reply(`there is currently an authorization going on for the Twitch channel ${channelName}.`);
+        return;
+    }
+    
+    const { oAuthUri, state } = twitch.generateOAuthUri();
+
+    await data.createAuthState(state, channelName, guild.id);
+    setTimeout(() => {      // Self delete after 10 min
+        data.removeAuthState(state);
+    }, 1000 * 60 * 10); // 10 min = 1000ms * 60s * 10min
 
     message.reply(`I have sent you a DM message. Please take a look at it :pleading_face:`);
     member.send(`Please authorize me so I can listen to your channel points redemptions and more :pleading_face: \n ${oAuthUri}`);
