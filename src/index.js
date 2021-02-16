@@ -4,6 +4,7 @@ const { connectToDB } = require('./data');
 const { loadConfig } = require('./config');
 const { discord } = require('./core/discord');
 const { twitch } = require('./core/twitch');
+const { express } = require('./core/express');
 const { invite } = require('./commands/invite');
 
 (async () => {
@@ -19,4 +20,7 @@ const { invite } = require('./commands/invite');
     // Init bots
     discord.init();
     twitch.init();
+
+    // Init webserver
+    express.init();
 })();

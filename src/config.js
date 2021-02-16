@@ -12,7 +12,12 @@ const config = {
     twitch: {
         user: '',
         token: '',
-        debug: ''
+        debug: '',
+        clientId: '',
+        clientSecret: ''
+    },
+    express: {
+        port: 8080
     }
 };
 

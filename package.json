@@ -25,6 +25,7 @@
   "homepage": "https://github.com/korti11/invi-me-bot#readme",
   "dependencies": {
     "discord.js": "^12.5.1",
+    "express": "^4.17.1",
     "mongoose": "^5.11.8",
     "tmi.js": "^1.7.1"
   },

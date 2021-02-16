@@ -8,6 +8,11 @@
     "twitch": {
         "user": "",
         "token": "",
-        "debug": true
+        "debug": true,
+        "clientId": "",
+        "clientSecret": ""
+    },
+    "express": {
+        "port": 8080
     }
 }
