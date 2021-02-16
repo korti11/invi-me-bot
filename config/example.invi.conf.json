@@ -10,7 +10,8 @@
         "token": "",
         "debug": true,
         "clientId": "",
-        "clientSecret": ""
+        "clientSecret": "",
+        "redirectHost": ""
     },
     "express": {
         "port": 8080

@@ -14,7 +14,8 @@ const config = {
         token: '',
         debug: '',
         clientId: '',
-        clientSecret: ''
+        clientSecret: '',
+        redirectHost: ''
     },
     express: {
         port: 8080
