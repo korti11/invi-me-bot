@@ -1,6 +1,7 @@
 const express = require('express');
 const { config } = require('../config');
 const { ExpressData } = require('../data/express');
+const { twitch } = require('./twitch');
 
 const app = express();
 const data = new ExpressData();
@@ -23,11 +24,12 @@ function init() {
         }
 
         if(await data.hasAuthState(stateToken)) {
+            res.send("Thanks for the authorization ❤ You can now close this site");
             const code = req.query.code;
             const scopes = req.query.scope.split(' ');
             const authState = await data.getAuthState(stateToken);
             data.setTwitchAuth(authState.twitchChannel, code, scopes);
-            res.send("Thanks for the authorization ❤ You can now close this site");
+            await twitch.getAndStoreInitalAccessToken(authState.twitchChannel, code);
             await data.removeAuthState(stateToken);
             return;
         } else {

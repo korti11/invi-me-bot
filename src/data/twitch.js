@@ -49,7 +49,7 @@ class TwitchData {
      * @param {Number} expiry New expiry timestamp.
      */
     async updateTokenData(twitchChannel, accessToken, refreshToken, expiry) {
-        const twitchAuth = this.getTwitchAuth(twitchChannel);
+        const twitchAuth = await TwitchAuth.findOne({ twitchChannel }).exec();
         twitchAuth.tokenData = { accessToken, refreshToken, expiry };
         twitchAuth.save();
     }

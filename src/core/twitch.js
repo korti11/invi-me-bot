@@ -1,16 +1,21 @@
 // eslint-disable-next-line no-unused-vars
 const { Client, ChatUserstate } = require('tmi.js');
+const { RefreshableAuthProvider, StaticAuthProvider, ApiClient } = require('twitch');
 const { config } = require('../config');
 const { TwitchData } = require('../data/twitch');
 const { isFunction, uniqueToken } = require('../util');
+const { default: fetch } = require('node-fetch');
 
 let clientId;
+let clientSecret;
 
 let chatClient;
 const commands = new Map();
 const commandPrefix = config.command_prefix;
 const data = new TwitchData();
-const scopes = 'channel:manage:redemptions';  // TODO: Add needed scopes
+const scopes = 'channel:manage:redemptions';
+
+const clients = new Map();
 
 async function init() {
     const options = {
@@ -34,6 +39,7 @@ async function init() {
     chatClient.on('chat', chatHandle);
 
     clientId = config.twitch.clientId;
+    clientSecret = config.twitch.clientSecret;
 }
 
 /**
@@ -66,6 +72,32 @@ function chatHandle(channel, user, message, self) {
     }
 
     commands.get(command)(channel, user, args);
+}
+
+/**
+ * Gets the api client for the given channel name.
+ * @param {String} channel Name of the channel to get the api client for. 
+ */
+async function getApiClient(channel) {
+    if(clients.has(channel)) {
+        return clients.get(channel);
+    } else {
+        const twitchAuth = await data.getTwitchAuth(channel);
+        const authProvider = new RefreshableAuthProvider(
+            new StaticAuthProvider(clientId, twitchAuth.tokenData.accessToken),
+            {
+                clientSecret,
+                refreshToken: twitchAuth.tokenData.refreshToken,
+                expiry: new Date(twitchAuth.tokenData.expiry),
+                onRefresh: async ({ accessToken, refreshToken, expiry }) => {
+                    await data.updateTokenData(channel, accessToken, refreshToken, expiry.getTime());
+                }
+            }
+        )
+        const apiClient = new ApiClient({ authProvider });
+        clients.set(channel, apiClient);
+        return apiClient;
+    }
 }
 
 // Twitch util functions
@@ -135,4 +167,21 @@ function generateOAuthUri() {
     return { oAuthUri, state };
 }
 
-exports.twitch = { init, isBroadcaster, registerCommand, joinChannel, leaveChannel, say, generateOAuthUri };
+/**
+ * Gets and stores the inital access token in the database.
+ * @param {String} channel Channel for which the access token should be retrieved.
+ * @param {String} oAuthCode OAuth code that the Twitch api sent back.
+ */
+async function getAndStoreInitalAccessToken(channel, oAuthCode) {
+    const redirectHost = config.twitch.redirectHost;
+    const protocol = redirectHost === 'localhost' ? 'http' : 'https' // http:// should only be used for development.
+    const port = config.express.port;
+    const redirectUri = `${protocol}://${redirectHost}:${port}/twitch`;
+
+    const oAuthUri = `https://id.twitch.tv/oauth2/token?client_id=${clientId}&client_secret=${clientSecret}&code=${oAuthCode}&grant_type=authorization_code&redirect_uri=${redirectUri}`
+    const response = await fetch(oAuthUri, { method: 'POST' });
+    const body = await response.json();
+    data.updateTokenData(channel, body.access_token, body.refresh_token, body.expires_in);
+}
+
+exports.twitch = { init, isBroadcaster, registerCommand, joinChannel, leaveChannel, say, generateOAuthUri, getAndStoreInitalAccessToken };
