@@ -5,30 +5,21 @@ const { twitch } = require('../../core/twitch');
 const { InviteData } = require('../../data/invite');
 
 const data = new InviteData();
+const subcommands = new Map();
 
 function init() {
     console.log('Register invite handlers.');
     discord.registerCommand('invite', discordInviteHandler);
     discord.registerLeaveHandler(discordLeaveHandler);
+
+    subcommands.set('list', listSubcommandHandler);
+    subcommands.set('remove', removeSubcommandHandler);
+    subcommands.set('info', infoSubcommandHandler);
+    subcommands.set('update', updateSubcommandHandler);
 }
 
 /**
  * Handler function for the 'invite' command.
- * 
- * Usage
- * !ty invite <channel_name>|list [arguments]
- * 
- * Command parameters
- * list                     List all Twitch channels.
- * <channel_name>           Twitch channel.
- * 
- * <channel_name> command arguments
- * -c |--chat               Send invite over Twitch chat.
- * -cp|--channelpoints      Send invite with channel points redemption.
- * -t |--time <number>      Time until invite is invalid.
- * -u |--usages <number>    How often a invite can be used.
- * -o |--off                Disables the invites for the given Twitch channel.
- * -i |--info               Displays current invite options for given Twitch channel.
  * 
  * @param {Guild} guild Guild where the command got executed on.
  * @param {GuildMember} member The member who used the command.
@@ -46,97 +37,165 @@ async function discordInviteHandler(guild, member, message, args) {
         return;
     }
 
-    if(args[0] === 'list') {
-        const channels = await data.getChannels(guild.id);
-        if(channels.length === 0) {
-            message.channel.send('No Twitch channels found for this server.');
-        } else {
-            const channelList = '- '.concat(channels.join('\n- '));
-            message.channel.send(`Found the following Twitch channels for this server: \n${channelList}`);
-        }
+    if(subcommands.has(args[0])) {
+        subcommands.get(args[0])(guild, member, message, args);
         return;
     }
 
+    await createInvite(guild, member, message, args);
+}
+
+/**
+ * Handler function for the 'list' subcommand.
+ * 
+ * Usage
+ * !ty invite list
+ * 
+ * @param {Guild} guild Guild where the command got executed on.
+ * @param {GuildMember} member The member who used the command.
+ * @param {Message} message Incoming message object.
+ * @param {String[]} args Command arguments.
+ */
+async function listSubcommandHandler(guild, member, message, args) {
+    const channels = await data.getChannels(guild.id);
+    if(channels.length === 0) {
+        message.channel.send('No Twitch channels found for this server.');
+    } else {
+        const channelList = '- '.concat(channels.join('\n- '));
+        message.channel.send(`Found the following Twitch channels for this server: \n${channelList}`);
+    }
+}
+
+/**
+ * Handler function for the 'remove' subcommand.
+ * 
+ * Usage
+ * !ty invite remove <channel_name>
+ * 
+ * Command parameters
+ * <channel_name>           Twitch channel.
+ * 
+ * @param {Guild} guild Guild where the command got executed on.
+ * @param {GuildMember} member The member who used the command.
+ * @param {Message} message Incoming message object.
+ * @param {String[]} args Command arguments.
+ */
+async function removeSubcommandHandler(guild, member, message, args) {
+    // Parameters
+    const channelName = '#'.concat(args[1].replace('#', '').toLocaleLowerCase());
+
+    const result = await data.removeInvite(channelName, guild.id);
+    if(result) {
+        message.channel.send(`Invites are off now for the Twitch channel ${channelName}.`);
+        twitch.leaveChannel(channelName);
+    } else {
+        message.reply(`couldn't turn off invites for the Twitch channel ${channelName}. Are you sure you have provided the right channel name?`);
+    }
+}
+
+/**
+ * Handler function for the 'info' subcommand.
+ * 
+ * Usage
+ * !ty invite info <channel_name> 
+ * 
+ * Command parameters
+ * <channel_name>           Twitch channel.
+ * 
+ * @param {Guild} guild Guild where the command got executed on.
+ * @param {GuildMember} member The member who used the command.
+ * @param {Message} message Incoming message object.
+ * @param {String[]} args Command arguments.
+ */
+async function infoSubcommandHandler(guild, member, message, args) {
+    // Parameters
+    const channelName = '#'.concat(args[1].replace('#', '').toLocaleLowerCase());
+
+    if(data.hasChannel(channelName, guild)) {
+        const invite = await data.getInvite(channelName);
+        const usages = invite.options.usages;
+        const time = invite.options.time;
+        let mode;
+        if(invite.rewardId === undefined) {
+            mode = 'chat';
+        } else {
+            mode = 'chat and channel points';
+        }
+        message.channel.send(`Invites for Twitch channel ${channelName} have ${usages} usages, a valid time of ${time / 60} mins and are available over ${mode}.`);
+    } else {
+        message.reply(`couldn't find invites for the Twitch channel ${channelName}. Are you sure you have provided the right channel name?`);
+    }
+}
+
+/**
+ * Handler function for the 'info' subcommand.
+ * 
+ * Usage
+ * !ty invite update <channel_name> [arguments]
+ * 
+ * Command parameters
+ * <channel_name>           Twitch channel.
+ * 
+ * Command arguments
+ * -t |--time <number>      Time until invite is invalid.
+ * -u |--usages <number>    How often a invite can be used.
+ * 
+ * @param {Guild} guild Guild where the command got executed on.
+ * @param {GuildMember} member The member who used the command.
+ * @param {Message} message Incoming message object.
+ * @param {String[]} args Command arguments.
+ */
+async function updateSubcommandHandler(guild, member, message, args) {
+    // Parameters
+    const channelName = '#'.concat(args[1].replace('#', '').toLocaleLowerCase());
+
+    if(data.hasChannel(channelName, guild)) {
+        data.updateInvite(channelName, guild.id, getUsagesOrUndefined(args), getTimeOrUndefined(args));
+        message.channel.send(`Updated invite options for the Twitch channel ${channelName}.`);
+    } else {
+        message.reply(`couldn't update invites for the Twitch channel ${channelName}. Are you sure you have provided the right channel name?`);
+    }
+}
+
+/**
+ * Handler function for the creation of invite objects.
+ * 
+ * Usage
+ * !ty invite <channel_name> [arguments]
+ * 
+ * Command parameters
+ * <channel_name>           Twitch channel.
+ * 
+ * Command arguments
+ * -t |--time <number>      Time until invite is invalid.
+ * -u |--usages <number>    How often a invite can be used.
+ * 
+ * @param {Guild} guild Guild where the command got executed on.
+ * @param {GuildMember} member The member who used the command.
+ * @param {Message} message Incoming message object.
+ * @param {String[]} args Command arguments.
+ */
+async function createInvite(guild, member, message, args) {
     // Parameters
     const channelName = '#'.concat(args[0].replace('#', '').toLocaleLowerCase());
 
     // Arguments
-    const chat = args.includes('-c') || args.includes('--chat');
-    const channelPoints = args.includes('-cp') || args.includes('--channelpoints');
     const time = getTime(args);
     const usages = getUsages(args);
-    const off = args.includes('-o') || args.includes('--off');
-    const info = args.includes('-i') || args.includes('--info');
 
     if(channelName.length < 2) {
         message.reply('no twitch channel provided.');
         return;
     }
 
-    // Remove invites for given Twitch channel
-    if(off) {
-        const result = await data.removeInvite(channelName, guild.id);
-        if(result) {
-            message.channel.send(`Invites are off now for the Twitch channel ${channelName}.`);
-            twitch.leaveChannel(channelName);
-        } else {
-            message.reply(`couldn't turn off invites for the Twitch channel ${channelName}. Are you sure you have provided the right channel name?`);
-        }
-        return;
-    }
-
-    // Update invites for given Twitch channel
-    if(await data.hasChannel(channelName, guild.id)) {
-        if(info) {
-            const invite = await data.getInvite(channelName);
-            const usages = invite.options.usages;
-            const time = invite.options.time;
-            let mode;
-            if(invite.options.mode === 1) {
-                mode = 'chat';
-            } else if(invite.options.mode === 2) {
-                mode = 'channel points';
-            } else {
-                mode = 'chat and channel points';
-            }
-            message.channel.send(`Invites for Twitch channel ${channelName} have ${usages} usages, a valid time of ${time / 60} mins and are available over ${mode}.`);
-        } else {
-            data.updateInvite(channelName, guild.id,
-                getUsagesOrUndefined(args), getTimeOrUndefined(args), undefined);
-            message.channel.send(`Updated invite options for the Twitch channel ${channelName}.`);
-        }
-        return;
-    }
-
-    // Create invites for given Twitch channel
-    if(!chat && !channelPoints) {
-        message.reply('you need to provide at least "-c" or "-cp" or both.');
-        return;
-    }
-
-    let mode = 0;
-
-    if(chat) {
-        mode += 1;
-    }
-
-    if(channelPoints) {
-        mode += 2;
-    }
-
     try {
-        await data.createInvite(channelName, guild.id, usages, time, mode);
+        await data.createInvite(channelName, guild.id, usages, time);
         message.channel.send(`Invites for the Twitch channel ${channelName} are now enabled.`);
-        if(chat) {
-            twitch.joinChannel(channelName);
-        }
-        if(channelPoints) {
-            // TODO: Subscribe for channel reward accept event.
-        }
+        twitch.joinChannel(channelName);
     } catch(error) {
+        console.log(error);
         message.reply('oh no an unexpected error has happened :face_with_monocle: I\'ll try my best that this doesn\'t happen again :pleading_face:');
     }
-
 }
 
 /**

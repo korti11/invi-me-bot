@@ -9,9 +9,9 @@ function init() {
         guild: { type: String, index: true },
         options: {
             usages: Number,
-            time: Number,
-            mode: Number
-        }
+            time: Number
+        },
+        rewardId: String
     });
     
     Invite = model('Invite', inviteSchema);
@@ -62,11 +62,10 @@ class InviteData {
      * @param {String} guild ID of the Discord guild.
      * @param {Number} usages Maximal uses for the new invites.
      * @param {Number} time Maximal time in seconds for the new invites.
-     * @param {Number} mode The mode in witch the invites getting used. 1 = Chat, 2 = Channel Points, 3 = Both
      * @returns {Invite} Newly created invite object.
      */
-    async createInvite(twitchChannel, guild, usages, time, mode) {
-        const invite = new Invite({ twitchChannel, guild, options: { usages, time, mode } });
+    async createInvite(twitchChannel, guild, usages, time) {
+        const invite = new Invite({ twitchChannel, guild, options: { usages, time } });
         return await invite.save();
     }
 
@@ -76,18 +75,14 @@ class InviteData {
      * @param {String} guild ID of the Discord guild.
      * @param {Number} usages Maximal uses for the new invites.
      * @param {Number} time Maximal time in seconds for the new invites.
-     * @param {Number} mode The mode in witch the invites getting used. 1 = Chat, 2 = Channel Points, 3 = Both
      */
-    async updateInvite(twitchChannel, guild, usages, time, mode) {
+    async updateInvite(twitchChannel, guild, usages, time) {
         const invite = await Invite.findOne({ twitchChannel, guild }).exec();
         if(usages !== undefined) {
             invite.options.usages = usages;
         }
         if(time !== undefined) {
             invite.options.time = time;
-        }
-        if(mode !== undefined) {
-            invite.options.mode = mode;
         }
         invite.save();
     }
