@@ -1,6 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 const { Client, ChatUserstate } = require('tmi.js');
-const { RefreshableAuthProvider, StaticAuthProvider, ApiClient } = require('twitch');
+const { RefreshableAuthProvider, StaticAuthProvider, ApiClient, HelixCustomReward, HelixCreateCustomRewardData, HelixUpdateCustomRewardData } = require('twitch');
 const { config } = require('../config');
 const { TwitchData } = require('../data/twitch');
 const { isFunction, uniqueToken } = require('../util');
@@ -76,7 +76,8 @@ function chatHandle(channel, user, message, self) {
 
 /**
  * Gets the api client for the given channel name.
- * @param {String} channel Name of the channel to get the api client for. 
+ * @param {String} channel Name of the channel to get the api client for.
+ * @returns {ApiClient} Api client for Twitch.
  */
 async function getApiClient(channel) {
     if(clients.has(channel)) {
@@ -149,6 +150,42 @@ function leaveChannel(channel) {
  */
 function say(channel, message) {
     chatClient.say(channel, message);
+}
+
+/**
+ * Creates a new channel point reward.
+ * @param {String} channel Channel name where the reward should be created.
+ * @param {HelixCreateCustomRewardData} rewardData Data for the new reward.
+ * @returns {HelixCustomReward} Newly created reward.
+ */
+async function createChannelPointReward(channel, rewardData) {
+    const apiClient = await getApiClient(channel);
+    const user = apiClient.helix.users.getUserByName(channel);
+    return await apiClient.helix.channelPoints.createCustomReward(user, rewardData);
+}
+
+/**
+ * Updates a given channel point reward.
+ * @param {String} channel Channel name where the reward should be updated.
+ * @param {String} rewardId Reward id which should be updated.
+ * @param {HelixUpdateCustomRewardData} rewardData Data for the reward.
+ * @returns {HelixCustomReward} Updated reward.
+ */
+async function updateChannelPointReward(channel, rewardId, rewardData) {
+    const apiClient = await getApiClient(channel);
+    const user = apiClient.helix.users.getUserByName(channel);
+    return await apiClient.helix.channelPoints.updateCustomReward(user, rewardId, rewardData);
+}
+
+/**
+ * Deletes a given channel point reward.
+ * @param {String} channel Channel name where the reward should be deleted.
+ * @param {String} rewardId Reward id which should be deleted.
+ */
+async function deleteChannelPointReward(channel, rewardId) {
+    const apiClient = await getApiClient(channel);
+    const user = apiClient.helix.users.getUserByName(channel);
+    await apiClient.helix.channelPoints.deleteCustomReward(user, rewardId);
 }
 
 /**
