@@ -24,8 +24,9 @@ function init() {
 
         if(await data.hasAuthState(stateToken)) {
             const code = req.query.code;
+            const scopes = req.query.scope.split(' ');
             const authState = await data.getAuthState(stateToken);
-            data.setTwitchAuth(authState.twitchChannel, code);
+            data.setTwitchAuth(authState.twitchChannel, code, scopes);
             res.send("Thanks for the authorization ❤ You can now close this site");
             await data.removeAuthState(stateToken);
             return;

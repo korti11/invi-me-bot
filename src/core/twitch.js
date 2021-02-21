@@ -10,7 +10,7 @@ let chatClient;
 const commands = new Map();
 const commandPrefix = config.command_prefix;
 const data = new TwitchData();
-const scopes = '';  // TODO: Add needed scopes
+const scopes = 'channel:manage:redemptions';  // TODO: Add needed scopes
 
 async function init() {
     const options = {

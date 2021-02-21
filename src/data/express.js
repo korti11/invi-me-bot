@@ -43,9 +43,10 @@ class ExpressData {
      * Updates a given TwitchAuth object or creates a new one if there is no one on the database.
      * @param {String} twitchChannel Name of Twitch channel.
      * @param {String} oAuthCode OAuth code that got sent from Twitch api.
+     * @param {String[]} scopes The scopes that the OAuth is valid for.
      */
-    async setTwitchAuth(twitchChannel, oAuthCode) {
-        await TwitchAuth.updateOne({ twitchChannel }, { oAuthCode, tokenData: undefined }, { upsert: true }).exec();
+    async setTwitchAuth(twitchChannel, oAuthCode, scopes) {
+        await TwitchAuth.updateOne({ twitchChannel }, { oAuthCode, scopes, tokenData: undefined }, { upsert: true }).exec();
     }
 }
 

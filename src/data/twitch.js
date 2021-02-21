@@ -9,6 +9,7 @@ function init() {
     const twitchAuthSchema = new Schema({
         twitchChannel: { type: String, index: true, unique: true },
         oAuthCode: { type: String, unique: true },
+        scopes: [String],
         tokenData: {
             accessToken: String,
             refreshToken: String,
