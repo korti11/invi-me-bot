@@ -75,14 +75,18 @@ class InviteData {
      * @param {String} guild ID of the Discord guild.
      * @param {Number} usages Maximal uses for the new invites.
      * @param {Number} time Maximal time in seconds for the new invites.
+     * @param {String} rewardId Id of the generated reward.
      */
-    async updateInvite(twitchChannel, guild, usages, time) {
+    async updateInvite(twitchChannel, guild, usages, time, rewardId) {
         const invite = await Invite.findOne({ twitchChannel, guild }).exec();
         if(usages !== undefined) {
             invite.options.usages = usages;
         }
         if(time !== undefined) {
             invite.options.time = time;
+        }
+        if(rewardId !== undefined) {
+            invite.rewardId = rewardId;
         }
         invite.save();
     }

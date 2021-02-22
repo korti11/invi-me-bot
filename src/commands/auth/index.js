@@ -35,7 +35,7 @@ async function discordAuthHandler(guild, member, message, args) {
         return;
     }
 
-    const channelName = args[0].replace('#', '').toLocaleLowerCase();
+    const channelName = '#'.concat(args[0].replace('#', '').toLocaleLowerCase());
     
     if(await data.hasAuthState(channelName)) {
         message.reply(`there is currently an authorization going on for the Twitch channel ${channelName}.`);

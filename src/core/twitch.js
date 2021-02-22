@@ -89,9 +89,10 @@ async function getApiClient(channel) {
             {
                 clientSecret,
                 refreshToken: twitchAuth.tokenData.refreshToken,
-                expiry: new Date(twitchAuth.tokenData.expiry),
+                expiry: twitchAuth.tokenData.expiry === null ? null : new Date(twitchAuth.tokenData.expiry),
                 onRefresh: async ({ accessToken, refreshToken, expiry }) => {
-                    await data.updateTokenData(channel, accessToken, refreshToken, expiry.getTime());
+                    const expires = expiry === null || expiry === undefined ? null : expiry.getTime();  // TODO: take a look why this is null
+                    await data.updateTokenData(channel, accessToken, refreshToken, expires);
                 }
             }
         )
@@ -160,7 +161,7 @@ function say(channel, message) {
  */
 async function createChannelPointReward(channel, rewardData) {
     const apiClient = await getApiClient(channel);
-    const user = apiClient.helix.users.getUserByName(channel);
+    const user = await apiClient.helix.users.getUserByName(channel.replace('#', ''));
     return await apiClient.helix.channelPoints.createCustomReward(user, rewardData);
 }
 
@@ -173,7 +174,7 @@ async function createChannelPointReward(channel, rewardData) {
  */
 async function updateChannelPointReward(channel, rewardId, rewardData) {
     const apiClient = await getApiClient(channel);
-    const user = apiClient.helix.users.getUserByName(channel);
+    const user = await apiClient.helix.users.getUserByName(channel.replace('#', ''));
     return await apiClient.helix.channelPoints.updateCustomReward(user, rewardId, rewardData);
 }
 
@@ -184,7 +185,7 @@ async function updateChannelPointReward(channel, rewardId, rewardData) {
  */
 async function deleteChannelPointReward(channel, rewardId) {
     const apiClient = await getApiClient(channel);
-    const user = apiClient.helix.users.getUserByName(channel);
+    const user = await apiClient.helix.users.getUserByName(channel.replace('#', ''));
     await apiClient.helix.channelPoints.deleteCustomReward(user, rewardId);
 }
 
@@ -196,7 +197,8 @@ function generateOAuthUri() {
     const state = uniqueToken();
     const redirectHost = config.twitch.redirectHost;
     const protocol = redirectHost === 'localhost' ? 'http' : 'https' // http:// should only be used for development.
-    const port = config.express.port;
+    //const port = config.express.port;
+    const port = 443;
     const redirectUri = `${protocol}://${redirectHost}:${port}/twitch`;
 
     const oAuthUri = `https://id.twitch.tv/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scopes}&state=${state}`;
@@ -212,7 +214,8 @@ function generateOAuthUri() {
 async function getAndStoreInitalAccessToken(channel, oAuthCode) {
     const redirectHost = config.twitch.redirectHost;
     const protocol = redirectHost === 'localhost' ? 'http' : 'https' // http:// should only be used for development.
-    const port = config.express.port;
+    // const port = config.express.port;
+    const port = 443;
     const redirectUri = `${protocol}://${redirectHost}:${port}/twitch`;
 
     const oAuthUri = `https://id.twitch.tv/oauth2/token?client_id=${clientId}&client_secret=${clientSecret}&code=${oAuthCode}&grant_type=authorization_code&redirect_uri=${redirectUri}`
@@ -221,4 +224,4 @@ async function getAndStoreInitalAccessToken(channel, oAuthCode) {
     data.updateTokenData(channel, body.access_token, body.refresh_token, body.expires_in);
 }
 
-exports.twitch = { init, isBroadcaster, registerCommand, joinChannel, leaveChannel, say, generateOAuthUri, getAndStoreInitalAccessToken };
+exports.twitch = { init, isBroadcaster, registerCommand, joinChannel, leaveChannel, say, generateOAuthUri, getAndStoreInitalAccessToken, createChannelPointReward, updateChannelPointReward, deleteChannelPointReward };

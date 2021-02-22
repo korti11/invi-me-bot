@@ -3,6 +3,7 @@ const { Guild, GuildMember, Message } = require('discord.js');
 const { discord } = require('../../core/discord');
 const { twitch } = require('../../core/twitch');
 const { InviteData } = require('../../data/invite');
+const { getArgumentOrDefault } = require('../../util');
 
 const data = new InviteData();
 const subcommands = new Map();
@@ -16,6 +17,7 @@ function init() {
     subcommands.set('remove', removeSubcommandHandler);
     subcommands.set('info', infoSubcommandHandler);
     subcommands.set('update', updateSubcommandHandler);
+    subcommands.set('channelpoint', channelPointSubcommand);
 }
 
 /**
@@ -150,10 +152,102 @@ async function updateSubcommandHandler(guild, member, message, args) {
     const channelName = '#'.concat(args[1].replace('#', '').toLocaleLowerCase());
 
     if(data.hasChannel(channelName, guild)) {
-        data.updateInvite(channelName, guild.id, getUsagesOrUndefined(args), getTimeOrUndefined(args));
+        data.updateInvite(channelName, guild.id, getUsagesOrUndefined(args), getTimeOrUndefined(args), undefined);
         message.channel.send(`Updated invite options for the Twitch channel ${channelName}.`);
     } else {
         message.reply(`couldn't update invites for the Twitch channel ${channelName}. Are you sure you have provided the right channel name?`);
+    }
+}
+
+/**
+ * Handler function for the 'channelpoint' subcommand.
+ * 
+ * Usage
+ * !ty invite channelpoint add|update|remove <channel_name> <cost> [arguments]
+ * 
+ * Command parameters
+ * add                      Add the channel point reward.
+ * update                   Update the channel point reward.
+ * remove                   Remove the channel point reward.
+ * 
+ * Add command parameters
+ * <channel_name>           Twitch channel.
+ * <cost>                   The reward cost.
+ * 
+ * Add argument parameters
+ * -t |--title <string>     Title of the reward.
+ * -c |--colour <string>    Background colour as hex code.
+ * 
+ * Update command parameters
+ * <channel_name>           Twitch channel.
+ * 
+ * Add argument parameters
+ * -t |--title <string>     Title of the reward.
+ * -c |--colour <string>    Background colour as hex code.
+ * --cost   <number>        The reward cost.
+ * 
+ * Remove command parameters
+ * <channel_name>           Twitch channel.
+ * 
+ * @param {Guild} guild Guild where the command got executed on.
+ * @param {GuildMember} member The member who used the command.
+ * @param {Message} message Incoming message object.
+ * @param {String[]} args Command arguments.
+ */
+async function channelPointSubcommand(guild, member, message, args) {
+    const subcommand = args[1];
+
+    // Parameters
+    const channelName = '#'.concat(args[2].replace('#', '').toLocaleLowerCase());
+
+    if(subcommand === 'remove') {
+        if(!data.hasChannel(channelName)) {
+            message.reply(`couldn't remove invite reward for the Twitch channel ${channelName}. Are you sure you have provided the right channel name?`);
+        }
+
+        const invite = await data.getInvite(channelName);
+        await twitch.deleteChannelPointReward(channelName, invite.rewardId);
+        message.channel.send(`Discord invite reward removed for Twitch channel ${channelName}.`);
+    } else if(subcommand === 'add') {
+        if(!data.hasChannel(channelName)) {
+            message.reply(`couldn't add invite reward for the Twitch channel ${channelName}. Are you sure you have provided the right channel name?`);
+        }
+
+        // Parameteres
+        const cost = parseInt(args[3], 10);
+
+        // Arguments
+        const title = getArgumentOrDefault(args, 't', 'title', 'Discord invite!');
+        const color = '#'.concat(getArgumentOrDefault(args, 'c', 'colour', '#7289DA').replace('#', ''));
+
+        const reward = await twitch.createChannelPointReward(channelName, { cost, title, backgroundColor: color, autoFulfill: true });
+        await data.updateInvite(channelName, guild.id, undefined, undefined, reward.id);
+        message.channel.send(`Discord invite reward created for Twitch channel ${channelName}.`);
+    } else {
+        if(!data.hasChannel(channelName)) {
+            message.reply(`couldn't update invite reward for the Twitch channel ${channelName}. Are you sure you have provided the right channel name?`);
+        }
+
+        // Arguments
+        const title = getArgumentOrDefault(args, 't', 'title', undefined);
+        const color = '#'.concat(getArgumentOrDefault(args, 'c', 'colour', '').replace('#', ''));
+        const cost = getArgumentOrDefault(args, undefined, 'cost', undefined);
+
+        const update = { }
+
+        if(title !== undefined) {
+            update.title = title;
+        }
+        if(color !== '#') {
+            update.backgroundColor = color;
+        }
+        if(cost !== undefined) {
+            update.cost = cost;
+        }
+
+        const invite = await data.getInvite(channelName);
+        await twitch.updateChannelPointReward(channelName, invite.rewardId, update);
+        message.channel.send(`Discord invite reward updated for Twitch channel ${channelName}.`);
     }
 }
 
@@ -204,10 +298,8 @@ async function createInvite(guild, member, message, args) {
  * @returns {Number|undefined} Returns the given time in seconds from the arguments if -t or --time is present, otherwise undefined.
  */
 function getTimeOrUndefined(args) {
-    let index = args.indexOf('-t');
-    if(index === -1) index = args.indexOf('--time');
-    if(index === -1) return undefined;
-    return 60 * parseInt(args[index + 1], 10);
+    let value = getArgumentOrDefault(args, 't', 'time', undefined);
+    return value !== undefined ? parseInt(value, 10) * 60 : value;
 }
 
 /**
@@ -216,8 +308,8 @@ function getTimeOrUndefined(args) {
  * @returns {Number} Returns the given time in seconds from the arguments if -t or --time is present, otherwise 15 mins in seconds.
  */
 function getTime(args) {
-    const value = getTimeOrUndefined(args);
-    return value !== undefined ? value : 60 * 15;
+    const value = getArgumentOrDefault(args, 't', 'time', 60 * 15);
+    return typeof value === 'string' ? parseInt(value, 10) * 60 : value;
 }
 
 /**
@@ -225,10 +317,8 @@ function getTime(args) {
  * @param {String[]} args Command arguments.
  */
 function getUsagesOrUndefined(args) {
-    let index = args.indexOf('-u');
-    if(index === -1) index = args.indexOf('--usages');
-    if(index === -1) return undefined;
-    return parseInt(args[index + 1], 10);
+    let value = getArgumentOrDefault(args, 'u', 'usages', undefined);
+    return value !== undefined ? parseInt(value, 10) : value;
 }
 
 /**
@@ -236,8 +326,7 @@ function getUsagesOrUndefined(args) {
  * @param {String[]} args Command arguments.
  */
 function getUsages(args) {
-    const value = getUsagesOrUndefined(args);
-    return value !== undefined ? value : 1;
+    return parseInt(getArgumentOrDefault(args, 'u', 'usages', '1'));
 }
 
 /**
